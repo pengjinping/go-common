@@ -29,18 +29,18 @@ import (
 func main() {
 	var customConfigs config.ConfigType
 
-    //应用的个性化路由组，开始
+	//应用的个性化路由组，开始
 	var routerConfig = make([]config.RouterConfig, 0)
 	apiRouter := router.InitApiRouter
 	routerConfig = append(routerConfig, config.RouterConfig{
 		Profile:      "/oa-micro-message/v1",
 		RouterDefine: &apiRouter,
 	})
-    //...
-    customConfigs.Set("Routers", routerConfig)
-    //应用的个性化路由组，结束
+	//...
+	customConfigs.Set("Routers", routerConfig)
+	//应用的个性化路由组，结束
 
-    //...可调用 customConfigs.Set() 方法，设置自己的一些配置项（同名key将会覆盖默认配置）
+	//...可调用 customConfigs.Set() 方法，设置自己的一些配置项（同名key将会覆盖默认配置）
 
 	e := initialize.InitWebEngine(&customConfigs)
 
