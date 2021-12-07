@@ -1,0 +1,22 @@
+server:
+  host: 127.0.0.1
+  port: 9070
+debug: true
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  password: 123456
+  username: root
+  dbname: oa2_platform
+jwt:
+  signing-key: dPserpf0uMxAYui0KDZVmwvJTFSRW4sTKYqnku0N94V5OCT9ggPtqWOoP1NL8u7n
+zap:
+  level: 'info'
+  format: 'console'
+  prefix: '[oa]'
+  director: 'log'
+  link-name: 'latest_log'
+  show-line: true
+  encode-level: 'LowercaseColorLevelEncoder'
+  stacktrace-key: 'stacktrace'
+  log-in-console: true
