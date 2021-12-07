@@ -19,12 +19,17 @@ func Init() *gin.Engine {
 			"success": true,
 		})
 	})
+	//TODO 中间件组
 	Router.Use(TenantMiddleware())
 	Router.Use(RecoveryMiddleware(logger.Logger, true))
-	for _, rtc := range config.Get("RouterConfig").([]config.RouterConfig) {
-		ApiGroup := Router.Group(rtc.Profile)
-		(*rtc.RouterDefine)(ApiGroup)
+
+	if RouterConfig := config.Get("Routers"); RouterConfig != nil {
+		for _, rtc := range RouterConfig.([]config.RouterConfig) {
+			routerGroup := Router.Group(rtc.Profile)
+			(*rtc.RouterDefine)(routerGroup)
+		}
 	}
+
 	return Router
 }
 
