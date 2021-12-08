@@ -115,6 +115,21 @@ func (c *RedisStore) Delete(key string) error {
 	return nil
 }
 
+func (c *RedisStore) IsExpire(key string) (bool, error) {
+	conn := c.pool.Get()
+	defer conn.Close()
+
+	b, err := redis.Bool(conn.Do("exists", key))
+	if err != nil {
+		return false, err
+	}
+	if b {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (c *RedisStore) Has(key string) (bool, error) {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -133,14 +148,7 @@ func (c *RedisStore) Has(key string) (bool, error) {
 func (c *RedisStore) Clear() error {
 	return nil
 }
-func (c *RedisStore) Size() int {
-	return 0
-}
 
 func (c *RedisStore) GetTTl(key string) (time.Duration, error) {
 	return time.Duration(0), nil
-}
-
-func (c *RedisStore) IsExpire(key string) (bool, error) {
-	return true, nil
 }

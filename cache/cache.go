@@ -16,12 +16,13 @@ type Cache struct {
 }
 
 type StoreInterface interface {
-	GetStoreName() string                              // 获取缓存驱动
-	Get(key string) (interface{}, error)               // 获取缓存数据
-	Set(key string, value interface{}, time int) error // 设置缓存带过期时间
-	Forever(key string, value interface{}) error       // 设置永久缓存无过期时间
-	Delete(key string) error                           // 删除key
-	Has(key string) (bool, error)                      // 判断key是否存在
+	GetStoreName() string                               // 获取缓存驱动
+	Get(key string) (interface{}, error)                // 获取缓存数据
+	Set(key string, value interface{}, time int) error  // 设置缓存带过期时间
+	Forever(key string, value interface{}) error        // 设置永久缓存无过期时间
+	Delete(key string) error                            // 删除key
+	Has(key string) (bool, error)                       // 判断key是否存在
+	IsExpire(key string) (bool, error)					// 判断key是否过期
 }
 
 func Init() {
@@ -92,4 +93,24 @@ func (c *Cache) Delete(key string) error {
 }
 func (c *Cache) Has(key string) (bool, error) {
 	return c.store.Has(tenantPrefix + key)
+}
+
+func (c *Cache) Remember(key string, time int, f func(...interface{}) (interface{}, error), args ...interface{}) (interface{}, error) {
+	isExpire, err := c.store.IsExpire(tenantPrefix + key)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isExpire {
+		return c.Get(key)
+	}
+
+	value, err := f(args...)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Set(key, value, time)
+
+	return value, err
 }
