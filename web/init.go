@@ -6,11 +6,12 @@ import (
 	"oa-common/logger"
 
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-var options = make(map[string]config.RouterDefine)
+var routerGroups = make(map[string]config.RouterDefine)
 
 func Init() *gin.Engine {
 	Router := gin.Default()
@@ -24,24 +25,17 @@ func Init() *gin.Engine {
 	Router.Use(TenantMiddleware())
 	Router.Use(RecoveryMiddleware(logger.Logger, true))
 
-	if RouterConfig := config.Get("Routers"); RouterConfig != nil {
-		for _, rtc := range RouterConfig.([]config.RouterConfig) {
-			routerGroup := Router.Group(rtc.BasePath)
-			(*rtc.RouterDefine)(routerGroup)
-		}
-	}
-
 	// 通过 Register注册路由
-	for profile, fun := range options {
-		(*fun)(Router.Group(profile))
+	for basePath, routeFunc := range routerGroups {
+		(*routeFunc)(Router.Group(basePath))
 	}
 
 	return Router
 }
 
 // Register 注册路由地址
-func Register(profile string, fun func(Router *gin.RouterGroup)) {
-	options[profile] = &fun
+func Register(basePath string, routeFunc func(Router *gin.RouterGroup)) {
+	routerGroups[basePath] = &routeFunc
 }
 
 func Start(e *gin.Engine) {

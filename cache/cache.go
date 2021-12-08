@@ -16,13 +16,13 @@ type Cache struct {
 }
 
 type StoreInterface interface {
-	GetStoreName() string                               // 获取缓存驱动
-	Get(key string) (interface{}, error)                // 获取缓存数据
-	Set(key string, value interface{}, time int) error  // 设置缓存带过期时间
-	Forever(key string, value interface{}) error        // 设置永久缓存无过期时间
-	Delete(key string) error                            // 删除key
-	Has(key string) (bool, error)                       // 判断key是否存在
-	IsExpire(key string) (bool, error)					// 判断key是否过期
+	GetStoreName() string                              // 获取缓存驱动
+	Get(key string) (interface{}, error)               // 获取缓存数据
+	Set(key string, value interface{}, time int) error // 设置缓存带过期时间
+	Forever(key string, value interface{}) error       // 设置永久缓存无过期时间
+	Delete(key string) error                           // 删除key
+	Has(key string) (bool, error)                      // 判断key是否存在
+	IsExpire(key string) (bool, error)                 // 判断key是否过期
 }
 
 func Init() {
@@ -45,11 +45,14 @@ func register(name string, store StoreInterface) {
 	}
 
 	Stores[name] = store
-	log.Printf("cache \"%s\" connected success. 可选择的缓存驱动:memory, redis", name)
+	log.Printf("cache \"%s\" connected success. 可选择的缓存驱动: memory, redis", name)
 }
 
 func getConfigCacheDriver() string {
-	conf := config.Get("Cache").(config.CacheConfig)
+	var conf config.CacheConfig
+	if err := config.UnmarshalKey("Cache", &conf); err != nil {
+		fmt.Printf("Cache config init failed: %v\n", err)
+	}
 	return strings.ToLower(conf.Driver)
 }
 

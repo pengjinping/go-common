@@ -2,10 +2,11 @@ package cache
 
 import (
 	"fmt"
-	"github.com/garyburd/redigo/redis"
-	"github.com/techoner/gophp/serialize"
 	"oa-common/config"
 	"time"
+
+	"github.com/garyburd/redigo/redis"
+	"github.com/techoner/gophp/serialize"
 )
 
 type RedisStore struct {
@@ -16,7 +17,10 @@ type RedisStore struct {
 var RedisName = "Redis"
 
 func NewRedisStore() *RedisStore {
-	conf := config.Get("Redis").(config.RedisConfig)
+	var conf config.RedisConfig
+	if err := config.UnmarshalKey("Redis", &conf); err != nil {
+		fmt.Printf("Redis config init failed: %v\n", err)
+	}
 	address := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 
 	pool := &redis.Pool{
@@ -66,7 +70,7 @@ func (c *RedisStore) Set(key string, value interface{}, t int) error {
 		_, err := conn.Do("setex", key, t, out)
 		return err
 	} else {
-		 _, err := conn.Do("set", key, out)
+		_, err := conn.Do("set", key, out)
 		return err
 	}
 }

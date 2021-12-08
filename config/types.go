@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/gin-gonic/gin"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ConfigType map[string]interface{}
@@ -43,11 +44,6 @@ type RedisConfig struct {
 
 type CacheConfig struct {
 	Driver string `mapstructure:"driver" json:"driver"`
-}
-
-type RouterConfig struct {
-	BasePath     string
-	RouterDefine RouterDefine
 }
 
 type ZapConfig struct {
