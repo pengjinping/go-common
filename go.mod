@@ -5,9 +5,11 @@ go 1.17
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.5.1
+	github.com/garyburd/redigo v1.6.3
 	github.com/gin-gonic/gin v1.7.7
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/spf13/viper v1.9.0
+	github.com/techoner/gophp v0.2.0
 	github.com/thoas/go-funk v0.9.1
 	go.uber.org/zap v1.19.1
 	gorm.io/driver/mysql v1.2.0

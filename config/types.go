@@ -1,12 +1,17 @@
 package config
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"time"
+)
 
 type ConfigType map[string]interface{}
 
 type defaultConfig struct {
 	Server ServerConfig `mapstructure:"server" json:"server" yaml:"server"`
 	Mysql  MysqlConfig  `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
+	Redis  RedisConfig  `mapstructure:"redis" json:"redis" yaml:"redis"`
+	Cache  CacheConfig  `mapstructure:"cache" json:"cache" yaml:"cache"`
 	JWT    JWTConfig    `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 	Zap    ZapConfig    `mapstructure:"zap" json:"zap" yaml:"zap"`
 	Debug  bool         `json:"Debug" yaml:"debug"`
@@ -26,6 +31,18 @@ type MysqlConfig struct {
 	Host     string `mapstructure:"host" json:"host"`
 	Port     int    `mapstructure:"port" json:"port"`
 	DBName   string `mapstructure:"dbname" json:"dbname"`
+}
+
+type RedisConfig struct {
+	Host       string        `mapstructure:"host" json:"host"`
+	Port       int           `mapstructure:"port" json:"port"`
+	Password   string        `mapstructure:"password" json:"password"`
+	DBName     int           `mapstructure:"dbname" json:"dbname"`
+	Expiration time.Duration `mapstructure:"expiration" json:"expiration"`
+}
+
+type CacheConfig struct {
+	Driver string `mapstructure:"driver" json:"driver"`
 }
 
 type RouterConfig struct {

@@ -29,6 +29,7 @@ import (
 func main() {
 	var customConfigs config.ConfigType
 
+	/*
 	//应用的个性化路由组，开始
 	var routerConfig = make([]config.RouterConfig, 0)
 	apiRouter := router.InitApiRouter
@@ -39,11 +40,38 @@ func main() {
 	//...
 	customConfigs.Set("Routers", routerConfig)
 	//应用的个性化路由组，结束
-
+	 */
+	
+	// 注册路由地址 [应用项目的路由包]
+	// router.Init()
+	
 	//...可调用 customConfigs.Set() 方法，设置自己的一些配置项（同名key将会覆盖默认配置）
 
 	e := initialize.InitWebEngine(&customConfigs)
 
 	web.Start(e)
+}
+```
+
+### 路由注册
+router/init.go
+```golang
+package router
+import "oa-common/web"
+
+func Init()  {
+	web.Register("/oa-micro-message/v1", InitApiRouter)
+}
+```
+router/api.go
+```golang
+package router
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+func InitApiRouter(Router *gin.RouterGroup) {
+	...
 }
 ```

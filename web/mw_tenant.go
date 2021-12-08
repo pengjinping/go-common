@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"net/http"
+	"oa-common/cache"
 	"oa-common/database"
 	"oa-common/model"
 
@@ -45,6 +46,10 @@ func TenantMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uuid := new(OaTenantProvider).TenantUUIDResolver(c)
 		c.Set("tenant", uuid)
+		// 切换缓存
+		cache.SetPrefix(uuid)
+
+		// 切换数据库
 		if db := database.GetDB(c); db != nil {
 			c.Set("DB", db)
 			c.Next()
@@ -54,4 +59,7 @@ func TenantMiddleware() gin.HandlerFunc {
 			return
 		}
 	}
+
+
+
 }
