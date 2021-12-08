@@ -8,6 +8,14 @@ mysql:
   password: 123456
   username: root
   dbname: oa2_platform
+redis:
+  host: oa-redis
+  port: 6379
+  password: 123456
+  dbname: 0
+  expiration: 300
+cache:
+  driver: redis
 jwt:
   signing-key: dPserpf0uMxAYui0KDZVmwvJTFSRW4sTKYqnku0N94V5OCT9ggPtqWOoP1NL8u7n
 zap:

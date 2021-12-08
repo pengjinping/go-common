@@ -6,10 +6,11 @@ import (
 	"oa-common/logger"
 
 	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
+
+var options = make(map[string]config.RouterDefine)
 
 func Init() *gin.Engine {
 	Router := gin.Default()
@@ -30,7 +31,17 @@ func Init() *gin.Engine {
 		}
 	}
 
+	// 通过 Register注册路由
+	for profile, fun := range options {
+		(*fun)(Router.Group(profile))
+	}
+
 	return Router
+}
+
+// Register 注册路由地址
+func Register(profile string, fun func(Router *gin.RouterGroup)) {
+	options[profile] = &fun
 }
 
 func Start(e *gin.Engine) {
