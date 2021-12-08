@@ -5,10 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"github.com/thoas/go-funk"
 )
 
 const (
@@ -19,71 +18,108 @@ const (
 	ProdConfigFile = "application-prod.yaml"
 )
 
-var Config = make(ConfigType)
+var config = viper.GetViper()
 
-func (c *ConfigType) Get(path string) interface{} {
-	return funk.Get(&Config, path)
+// IsSet checks to see if the key has been set in any of the data locations.
+// IsSet is case-insensitive for a key.
+func IsSet(key string) bool { return config.IsSet(key) }
+
+// Set sets the value for the key in the override register.
+// Set is case-insensitive for a key.
+// Will be used instead of values obtained via
+// flags, config file, ENV, default, or key/value store.
+func Set(key string, value interface{}) { config.Set(key, value) }
+
+// Get can retrieve any value given the key to use.
+// Get is case-insensitive for a key.
+// Get has the behavior of returning the value associated with the first
+// place from where it is set. Viper will check in the following order:
+// override, flag, env, config file, key/value store, default
+//
+// Get returns an interface. For a specific value use one of the Get____ methods.
+func Get(key string) interface{} { return config.Get(key) }
+
+// GetString returns the value associated with the key as a string.
+func GetString(key string) string { return config.GetString(key) }
+
+// GetBool returns the value associated with the key as a boolean.
+func GetBool(key string) bool { return config.GetBool(key) }
+
+// GetInt returns the value associated with the key as an integer.
+func GetInt(key string) int { return config.GetInt(key) }
+
+// GetInt32 returns the value associated with the key as an integer.
+func GetInt32(key string) int32 { return config.GetInt32(key) }
+
+// GetInt64 returns the value associated with the key as an integer.
+func GetInt64(key string) int64 { return config.GetInt64(key) }
+
+// GetUint returns the value associated with the key as an unsigned integer.
+func GetUint(key string) uint { return config.GetUint(key) }
+
+// GetUint32 returns the value associated with the key as an unsigned integer.
+func GetUint32(key string) uint32 { return config.GetUint32(key) }
+
+// GetUint64 returns the value associated with the key as an unsigned integer.
+func GetUint64(key string) uint64 { return config.GetUint64(key) }
+
+// GetFloat64 returns the value associated with the key as a float64.
+func GetFloat64(key string) float64 { return config.GetFloat64(key) }
+
+// GetTime returns the value associated with the key as time.
+func GetTime(key string) time.Time { return config.GetTime(key) }
+
+// GetDuration returns the value associated with the key as a duration.
+func GetDuration(key string) time.Duration { return config.GetDuration(key) }
+
+// GetIntSlice returns the value associated with the key as a slice of int values.
+func GetIntSlice(key string) []int { return config.GetIntSlice(key) }
+
+// GetStringSlice returns the value associated with the key as a slice of strings.
+func GetStringSlice(key string) []string { return config.GetStringSlice(key) }
+
+// GetStringMap returns the value associated with the key as a map of interfaces.
+func GetStringMap(key string) map[string]interface{} { return config.GetStringMap(key) }
+
+// GetStringMapString returns the value associated with the key as a map of strings.
+func GetStringMapString(key string) map[string]string { return config.GetStringMapString(key) }
+
+// GetStringMapStringSlice returns the value associated with the key as a map to a slice of strings.
+func GetStringMapStringSlice(key string) map[string][]string {
+	return config.GetStringMapStringSlice(key)
 }
 
-func Get(path string) interface{} {
-	return Config.Get(path)
+// GetSizeInBytes returns the size of the value associated with the given key
+// in bytes.
+func GetSizeInBytes(key string) uint { return config.GetSizeInBytes(key) }
+
+// UnmarshalKey takes a single key and unmarshals it into a Struct.
+func UnmarshalKey(key string, rawVal interface{}, opts ...viper.DecoderConfigOption) error {
+	return config.UnmarshalKey(key, rawVal, opts...)
 }
 
-func GetString(path string) string {
-	return Config.Get(path).(string)
-}
-
-func GetInt(path string) int {
-	return Config.Get(path).(int)
-}
-
-func GetBool(path string) bool {
-	return Config.Get(path).(bool)
-}
-
-//暂只支持顶层，不支持"A.B.C"这种path
-func (c *ConfigType) Set(path string, value interface{}) {
-	Config[path] = value
-}
-
-//暂只支持顶层，不支持"A.B.C"这种path
-func Set(path string, value interface{}) {
-	Config.Set(path, value)
+// GetViper gets the global Viper instance.
+func GetViper() *viper.Viper {
+	return config
 }
 
 func Init(customConf *ConfigType) {
-	var defaultConf defaultConfig
 	configFile := getConfigFile()
-	v := viper.New()
-	v.SetConfigFile(configFile)
-	v.SetConfigType("yaml")
-	err := v.ReadInConfig()
+	config.SetConfigFile(configFile)
+	config.SetConfigType("yaml")
+	err := config.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
-	v.WatchConfig()
-	v.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("config file changed:", e.Name)
-		if err := v.Unmarshal(&defaultConf); err != nil {
-			fmt.Println(err)
-		}
-	})
+	config.WatchConfig()
 
-	if err := v.Unmarshal(&defaultConf); err != nil {
-		fmt.Println(err)
-	}
+	// config.SetEnvPrefix("OA")
+	config.AutomaticEnv()
 
-	funk.Map(funk.Keys(defaultConf), func(k string) string {
-		if cv := customConf.Get(k); cv != nil {
-			Set(k, cv)
-		} else {
-			Set(k, funk.Get(defaultConf, k))
-		}
-		return k
-	})
+	config.MergeConfigMap(*customConf)
 
 	if GetBool("Debug") {
-		j, _ := json.Marshal(Config)
+		j, _ := json.Marshal(config.AllSettings())
 		fmt.Printf("\nDebug模式：开启\n========Config========\n%v\n======================\n", string(j))
 	}
 

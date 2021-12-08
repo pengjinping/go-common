@@ -33,7 +33,7 @@ func main() {
 	var routerConfig = make([]config.RouterConfig, 0)
 	apiRouter := router.InitApiRouter
 	routerConfig = append(routerConfig, config.RouterConfig{
-		Profile:      "/oa-micro-message/v1",
+		BasePath:      "/oa-micro-message/v1",
 		RouterDefine: &apiRouter,
 	})
 	//...

@@ -25,7 +25,7 @@ func Init() *gin.Engine {
 
 	if RouterConfig := config.Get("Routers"); RouterConfig != nil {
 		for _, rtc := range RouterConfig.([]config.RouterConfig) {
-			routerGroup := Router.Group(rtc.Profile)
+			routerGroup := Router.Group(rtc.BasePath)
 			(*rtc.RouterDefine)(routerGroup)
 		}
 	}

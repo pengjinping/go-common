@@ -33,13 +33,21 @@ func GetDB(ctx context.Context) *gorm.DB {
 
 func GetDBByName(ctx context.Context, dbName string) *gorm.DB {
 	if _, ok := dbConns[dbName]; !ok {
-		conf := config.Get("Mysql").(config.MysqlConfig)
+		conf := getConfig()
 		if conf.DBName != dbName && dbName != "" && dbName != "platform" && !strings.Contains(dbName, ":") {
 			conf.DBName = dbName
 		}
 		connect(&conf, dbName)
 	}
 	return dbConns[dbName].WithContext(ctx)
+}
+
+func getConfig() config.MysqlConfig {
+	var conf config.MysqlConfig
+	if err := config.UnmarshalKey("Mysql", &conf); err != nil {
+		fmt.Printf("DB Config init failed: %s\n", err)
+	}
+	return conf
 }
 
 func connect(cfg *config.MysqlConfig, dbName string) {

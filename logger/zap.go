@@ -63,7 +63,10 @@ func Init() {
 }
 
 func getZapConfig() config.ZapConfig {
-	zapConf := config.Get("Zap").(config.ZapConfig)
+	var zapConf config.ZapConfig
+	if err := config.UnmarshalKey("Zap", &zapConf); err != nil {
+		fmt.Printf("Zap config init failed: %s\n", err)
+	}
 	return zapConf
 }
 

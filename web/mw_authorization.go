@@ -50,7 +50,7 @@ func newParser() *jwt.Parser {
 
 // api请求认证
 func ApiAuthMiddleware() gin.HandlerFunc {
-	sk := []byte(config.GetString("JWT.SigningKey"))
+	sk := []byte(config.GetString("jwt.signing-key"))
 	return func(c *gin.Context) {
 		tok, err := ParseToken(c.Request, sk)
 

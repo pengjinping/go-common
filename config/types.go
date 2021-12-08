@@ -29,7 +29,7 @@ type MysqlConfig struct {
 }
 
 type RouterConfig struct {
-	Profile      string
+	BasePath     string
 	RouterDefine RouterDefine
 }
 
