@@ -24,8 +24,15 @@ func (ms *MemoryStore) Set(key string, value interface{}, time int) {
 	defer ms.mu.Unlock()
 
 	m := &Memory{}
-	m.Set(key, value, time)
-	ms.list[key] = ms.expireList.PushBack(m)
+	if time > 0 {
+		m.Set(key, value, time)
+		ms.list[key] = ms.expireList.PushBack(m)
+	} else {
+		m.Forever(key, value)
+
+		listItem := list.New()
+		ms.list[key] = listItem.PushBack(m)
+	}
 }
 
 func (ms *MemoryStore) Forever(key string, value interface{}) {
