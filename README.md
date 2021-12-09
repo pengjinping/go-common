@@ -62,3 +62,44 @@ func InitApiRouter(Router *gin.RouterGroup) {
 	...
 }
 ```
+
+### 缓存使用
+在配置文件中设置缓存驱动,目前支持：memory(内存缓存), redis
+```yaml
+cache:
+  driver: memory
+```
+缓存的使用：
+```golang
+    // 获取本次请求的默认缓存 【支持多租户分组】
+    cache := cache.GetDefault(c)
+    
+    // 也可以指定驱动 如: 指定缓存驱动示例
+    caMemory := cache.GetByDriver(c, "memory")
+    
+    // 获取缓存驱动名称
+    fmt.Printf("%s\n", ca.GetStoreName())
+    
+    // 获取缓存租户uuid
+    fmt.Printf("%s\n", ca.GetTenant())
+
+    // 设置缓存，有有效期 单位是s  当时间为0时 是永久有效 等于Forever
+    ca.Set("AA", timehelper.FormatDateTime(time.Now()), 2)
+    // 设置永久缓存 
+    ca.Forever("AA", timehelper.FormatDateTime(time.Now()))
+    
+    // 获取缓存、是否存在、是否过期
+    fmt.Printf("测试值：%s\n", ca.Get("AA"))
+    fmt.Printf("是否存在：%v\n", ca.Has("AA"))
+    fmt.Printf("是否过期：%v\n", ca.IsExpire("AA"))
+    
+    // 删除缓存
+    ca.Delete("AA")
+    
+    // 缓存支持闭包函数 在闭包中可以通过后面的参数传进去 不要使用全局变量防止数据污染
+    res := ca.Remember("key", 5, func(args ...interface{}) (interface{}, error) {
+        a := args[0].(int)
+        b := args[1].(int)
+        return a + b + 456, nil
+    }, 4, 500)
+```

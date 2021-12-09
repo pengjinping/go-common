@@ -47,8 +47,11 @@ func TenantMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uuid := new(OaTenantProvider).TenantUUIDResolver(c)
 		c.Set("tenant", uuid)
+
 		// 切换缓存
-		cache.SetPrefix(uuid)
+		if ca := cache.GetDefault(c); ca != nil {
+			c.Set("Cache", ca)
+		}
 
 		// 切换数据库
 		if db := database.GetDB(c); db != nil {

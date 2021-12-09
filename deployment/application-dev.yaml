@@ -12,11 +12,11 @@ mysql:
 redis:
   host: 127.0.0.1
   port: 6379
-  password: 
+  password: 123456
   dbname: 0
   expiration: 300
 cache:
-  driver: redis
+  driver: memory
 jwt:
   signing-key: dPserpf0uMxAYui0KDZVmwvJTFSRW4sTKYqnku0N94V5OCT9ggPtqWOoP1NL8u7n
 zap:
