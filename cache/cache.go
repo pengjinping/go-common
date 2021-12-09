@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -9,44 +10,47 @@ import (
 )
 
 var Stores = make(map[string]StoreInterface)
-var tenantPrefix string
 
 type Cache struct {
-	name  string
-	store StoreInterface
+	driver string // 缓存驱动
+	name   string // 缓存前缀 租户标识
+	store  StoreInterface
 }
 
 type StoreInterface interface {
-	GetStoreName() string                              // 获取缓存驱动
-	Get(key string) (interface{}, error)               // 获取缓存数据
-	Set(key string, value interface{}, time int) error // 设置缓存带过期时间
-	Forever(key string, value interface{}) error       // 设置永久缓存无过期时间
-	Delete(key string) error                           // 删除key
-	Has(key string) (bool, error)                      // 判断key是否存在
-	IsExpire(key string) (bool, error)                 // 判断key是否过期
+	Set(key string, value interface{}, time int) // 设置缓存带过期时间
+	Forever(key string, value interface{})       // 设置永久缓存无过期时间
+	Get(key string) interface{}                  // 获取缓存数据
+	Delete(key string)                    	 	 // 删除key
+	Has(key string) bool             			 // 判断key是否存在
+	IsExpire(key string) bool          			 // 判断key是否过期
 }
 
 func Init() {
 	// 需要使用的时候直接获取，没有注入到全局变量中
 	driver := getConfigCacheDriver()
-	if driver == "redis" {
-		register(RedisName, NewRedisStore())
-	} else {
-		register(MemoryName, NewMemoryStore())
-	}
+	Register(driver)
 }
-func register(name string, store StoreInterface) {
-	if store == nil {
-		log.Panic("Cache: Register store is nil")
+
+func Register(driver string) {
+	driver = strings.ToLower(driver)
+
+	var store StoreInterface
+	if driver == "redis" {
+		store = NewRedisStore()
+	} else if driver == "memory" {
+		store = NewMemoryStore()
+	} else {
+		log.Printf("缓存驱动 \"%s\" 不存在. 可选择的缓存驱动: memory, redis\n", driver)
+		return
 	}
 
-	name = strings.ToLower(name)
-	if _, ok := Stores[name]; ok {
-		log.Panic("Cache: Register store is exist")
+	if _, ok := Stores[driver]; ok {
+		return
 	}
 
-	Stores[name] = store
-	log.Printf("cache \"%s\" connected success. 可选择的缓存驱动: memory, redis", name)
+	Stores[driver] = store
+	log.Printf("Cache driver \"%s\" connected success.", driver)
 }
 
 func getConfigCacheDriver() string {
@@ -54,67 +58,96 @@ func getConfigCacheDriver() string {
 	if err := config.UnmarshalKey("Cache", &conf); err != nil {
 		fmt.Printf("Cache config init failed: %v\n", err)
 	}
-	return strings.ToLower(conf.Driver)
-}
 
-func SetPrefix(prefix string) {
-	tenantPrefix = prefix + ":"
-}
-
-func Get() (*Cache, error) {
-	driver := getConfigCacheDriver()
+	driver := strings.ToLower(conf.Driver)
 	if len(driver) <= 0 {
 		driver = "memory"
 	}
 
-	if store, ok := Stores[driver]; ok {
-		return &Cache{
-			name:  driver, //有点多余
-			store: store,
-		}, nil
+	return driver
+}
+
+func GetDefault(ctx context.Context) *Cache {
+	driver := getConfigCacheDriver()
+	return GetByDriver(ctx, driver)
+}
+
+func GetByDriver(ctx context.Context, driver string) *Cache {
+	var ca *Cache
+	ca, tenant := getTenant(ctx)
+	if ca != nil && ca.driver == driver {
+		return ca
 	}
 
-	return nil, fmt.Errorf("缓存驱动未设置")
+	if _, ok := Stores[driver]; !ok {
+		Register(driver)
+	}
+	return &Cache{
+		driver: driver,
+		name:   tenant,
+		store:  Stores[driver],
+	}
+}
+
+func getTenant(ctx context.Context) (*Cache, string) {
+	var ca *Cache
+	if caName := ctx.Value("Cache"); caName != nil {
+		ca = caName.(*Cache)
+	}
+
+	var tenant string
+	if tenantName := ctx.Value("tenant"); tenantName != nil {
+		tenant = tenantName.(string)
+	} else {
+		tenant = "platform"
+	}
+
+	return ca, tenant
 }
 
 /** 结构体方法 */
 
 func (c *Cache) GetStoreName() string {
-	return c.store.GetStoreName()
+	return c.driver
+}
+func (c *Cache) GetTenant() string {
+	return c.name
+}
+func (c *Cache) setTenant(tenant string){
+	c.name = tenant
 }
 
-func (c *Cache) Set(key string, value interface{}, time int) error {
-	return c.store.Set(tenantPrefix+key, value, time)
+func (c *Cache) Set(key string, value interface{}, time int) {
+	c.store.Set(c.name+key, value, time)
 }
-func (c *Cache) Forever(key string, value interface{}) error {
-	return c.store.Forever(tenantPrefix+key, value)
+func (c *Cache) Forever(key string, value interface{}) {
+	c.store.Forever(c.name+key, value)
 }
-func (c *Cache) Get(key string) (interface{}, error) {
-	return c.store.Get(tenantPrefix + key)
-}
-func (c *Cache) Delete(key string) error {
-	return c.store.Delete(tenantPrefix + key)
-}
-func (c *Cache) Has(key string) (bool, error) {
-	return c.store.Has(tenantPrefix + key)
+func (c *Cache) Get(key string) interface{} {
+	return c.store.Get(c.name + key)
 }
 
-func (c *Cache) Remember(key string, time int, f func(...interface{}) (interface{}, error), args ...interface{}) (interface{}, error) {
-	isExpire, err := c.store.IsExpire(tenantPrefix + key)
-	if err != nil {
-		return nil, err
-	}
+func (c *Cache) Delete(key string) {
+	c.store.Delete(c.name + key)
+}
+func (c *Cache) Has(key string) bool {
+	return c.store.Has(c.name + key)
+}
+func (c *Cache) IsExpire(key string) bool {
+	return c.store.IsExpire(c.name + key)
+}
 
+func (c *Cache) Remember(key string, time int, f func(...interface{}) (interface{}, error), args ...interface{}) interface{} {
+	isExpire := c.store.IsExpire(c.name + key)
 	if !isExpire {
 		return c.Get(key)
 	}
 
 	value, err := f(args...)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	c.Set(key, value, time)
-
-	return value, err
+	return value
 }
