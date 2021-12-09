@@ -3,9 +3,10 @@ package web
 import (
 	"fmt"
 	"net/http"
-	"oa-common/config"
-	"oa-common/logger"
 	"strings"
+
+	"git.kuainiujinke.com/oa/oa-common/config"
+	"git.kuainiujinke.com/oa/oa-common/logger"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"

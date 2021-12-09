@@ -1,11 +1,11 @@
 package initialize
 
 import (
-	"oa-common/cache"
-	"oa-common/config"
-	"oa-common/database"
-	"oa-common/logger"
-	"oa-common/web"
+	"git.kuainiujinke.com/oa/oa-common/cache"
+	"git.kuainiujinke.com/oa/oa-common/config"
+	"git.kuainiujinke.com/oa/oa-common/database"
+	"git.kuainiujinke.com/oa/oa-common/logger"
+	"git.kuainiujinke.com/oa/oa-common/web"
 
 	"github.com/gin-gonic/gin"
 )

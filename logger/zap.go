@@ -2,10 +2,11 @@ package logger
 
 import (
 	"fmt"
-	"oa-common/config"
-	"oa-common/utils"
 	"os"
 	"time"
+
+	"git.kuainiujinke.com/oa/oa-common/config"
+	"git.kuainiujinke.com/oa/oa-common/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/natefinch/lumberjack"

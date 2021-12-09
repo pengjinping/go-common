@@ -3,9 +3,10 @@ package web
 import (
 	"context"
 	"net/http"
-	"oa-common/cache"
-	"oa-common/database"
-	"oa-common/model"
+
+	"git.kuainiujinke.com/oa/oa-common/cache"
+	"git.kuainiujinke.com/oa/oa-common/database"
+	"git.kuainiujinke.com/oa/oa-common/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,7 +60,5 @@ func TenantMiddleware() gin.HandlerFunc {
 			return
 		}
 	}
-
-
 
 }

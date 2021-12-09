@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"oa-common/config"
 	"strings"
+
+	"git.kuainiujinke.com/oa/oa-common/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

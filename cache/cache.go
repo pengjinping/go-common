@@ -3,8 +3,9 @@ package cache
 import (
 	"fmt"
 	"log"
-	"oa-common/config"
 	"strings"
+
+	"git.kuainiujinke.com/oa/oa-common/config"
 )
 
 var Stores = make(map[string]StoreInterface)

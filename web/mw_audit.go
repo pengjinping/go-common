@@ -4,11 +4,12 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"oa-common/logger"
 	"os"
 	"runtime/debug"
 	"strings"
 	"time"
+
+	"git.kuainiujinke.com/oa/oa-common/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

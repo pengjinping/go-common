@@ -2,8 +2,9 @@ package cache
 
 import (
 	"fmt"
-	"oa-common/config"
 	"time"
+
+	"git.kuainiujinke.com/oa/oa-common/config"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/techoner/gophp/serialize"

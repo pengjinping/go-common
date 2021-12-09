@@ -21,9 +21,9 @@ OA 公共包，不独立运行，而是被 import 到业务应用中。
 package main
 
 import (
-	"oa-common/config"
-	"oa-common/initialize"
-	"oa-common/web"
+	"git.kuainiujinke.com/oa/oa-common/config"
+	"git.kuainiujinke.com/oa/oa-common/initialize"
+	"git.kuainiujinke.com/oa/oa-common/web"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 router/init.go
 ```golang
 package router
-import "oa-common/web"
+import "git.kuainiujinke.com/oa/oa-common/web"
 
 func Init()  {
 	web.Register("/oa-micro-message/v1", InitApiRouter)

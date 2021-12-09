@@ -2,8 +2,9 @@ package web
 
 import (
 	"net/http"
-	"oa-common/config"
-	"oa-common/logger"
+
+	"git.kuainiujinke.com/oa/oa-common/config"
+	"git.kuainiujinke.com/oa/oa-common/logger"
 
 	"fmt"
 

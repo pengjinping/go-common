@@ -113,7 +113,8 @@ func Init(customConf *ConfigType) {
 	}
 	config.WatchConfig()
 
-	// config.SetEnvPrefix("OA")
+	//环境变量注册进来
+	config.SetEnvPrefix(config.GetString("envPrefix"))
 	config.AutomaticEnv()
 
 	config.MergeConfigMap(*customConf)
