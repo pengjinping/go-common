@@ -1,7 +1,14 @@
 package web
 
 import (
+	"context"
+	"errors"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"git.kuainiujinke.com/oa/oa-common/config"
 	"git.kuainiujinke.com/oa/oa-common/utils"
@@ -9,7 +16,6 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type routerConfig struct {
@@ -51,11 +57,40 @@ func Register(basePath string, middlewareGroupname string, routerFunc func(Route
 }
 
 func Start(e *gin.Engine) {
-	//TODO 优雅重启/退出
-	//TODO 包住所有运行时panic
+	//TODO 包住所有运行时panic？
+
 	port := config.GetInt("Server.Port")
-	zap.S().Debugf("启动服务器, 端口： %d", port)
-	if err := e.Run(fmt.Sprintf(":%d", port)); err != nil {
-		zap.S().Panic("启动失败:", err.Error())
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: e,
 	}
+
+	go func() {
+		log.Printf("启动服务器, 端口： %d", port)
+
+		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
+			log.Printf("Listen: %s\n", err)
+		}
+	}()
+
+	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	quit := make(chan os.Signal)
+	// kill (no param) default send syscall.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	fmt.Println("==================")
+	log.Println("Shutting down server...")
+
+	// The context is used to inform the server it has 5 seconds to finish
+	// the request it is currently handling
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("服务已关闭")
 }
