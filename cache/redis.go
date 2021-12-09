@@ -3,7 +3,7 @@ package cache
 import (
 	"fmt"
 	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/timehelper"
+	timeHelper "git.kuainiujinke.com/oa/oa-common/utils/time"
 	"github.com/garyburd/redigo/redis"
 	"github.com/techoner/gophp/serialize"
 	"time"
@@ -20,7 +20,7 @@ func NewRedisStore() *RedisStore {
 		fmt.Printf("Redis config init failed: %v\n", err)
 	}
 	address := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
-	fmt.Printf("%s Redis连接信息：%s - ", timehelper.FormatDateTime(time.Now()), address)
+	fmt.Printf("%s Redis连接信息: %s - ", timeHelper.FormatDateTime(time.Now()), address)
 
 	pool := &redis.Pool{
 		MaxActive:   512,
