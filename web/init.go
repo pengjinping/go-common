@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/logger"
+	"git.kuainiujinke.com/oa/oa-common/utils"
 
 	"fmt"
 
@@ -12,31 +12,42 @@ import (
 	"go.uber.org/zap"
 )
 
-var routerGroups = make(map[string]config.RouterDefine)
+type routerConfig struct {
+	MiddlewareGroupName string
+	RouterFunc          config.RouterDefine
+}
+
+var routerGroups = make(map[string]routerConfig)
 
 func Init() *gin.Engine {
 	Router := gin.Default()
+
+	if exists, err := utils.PathExists("./templates"); err == nil && exists {
+		Router.LoadHTMLGlob("templates/*")
+	}
+
 	Router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"success": true,
 		})
 	})
-	//TODO 中间件组
-	Router.Use(TenantMiddleware())
-	Router.Use(RecoveryMiddleware(logger.Logger, true))
 
-	// 通过 Register注册路由
-	for basePath, routeFunc := range routerGroups {
-		(*routeFunc)(Router.Group(basePath))
+	// 通过 Register注册路由组, 以及各组路由对应的中间件组
+	for basePath, config := range routerGroups {
+		group := Router.Group(basePath)
+		ApplyMiddlewareGroup(group, config.MiddlewareGroupName)
+		(*config.RouterFunc)(group)
 	}
 
 	return Router
 }
 
 // Register 注册路由地址
-func Register(basePath string, routeFunc func(Router *gin.RouterGroup)) {
-	routerGroups[basePath] = &routeFunc
+// @param middlewareGroupname 中间件组的名称，如：web、api、openAPI、publicWeb...等。详见 mw_group.go 中的定义。
+// 若没找到合适的中间件组，可以先调用 web.AddToMiddlewareGroup() 来注册自己的组。
+func Register(basePath string, middlewareGroupname string, routerFunc func(Router *gin.RouterGroup)) {
+	routerGroups[basePath] = routerConfig{middlewareGroupname, &routerFunc}
 }
 
 func Start(e *gin.Engine) {

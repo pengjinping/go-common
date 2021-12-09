@@ -9,13 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"git.kuainiujinke.com/oa/oa-common/config"
 	"git.kuainiujinke.com/oa/oa-common/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-func AuditMiddleware(logger *logger.TenantLogger) gin.HandlerFunc {
+func AuditMiddleware() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -38,7 +39,7 @@ func AuditMiddleware(logger *logger.TenantLogger) gin.HandlerFunc {
 	}
 }
 
-func RecoveryMiddleware(logger *logger.TenantLogger, stack bool) gin.HandlerFunc {
+func RecoveryMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -65,6 +66,7 @@ func RecoveryMiddleware(logger *logger.TenantLogger, stack bool) gin.HandlerFunc
 					return
 				}
 
+				stack := config.GetBool("Debug")
 				if stack {
 					logger.Error(c, "[Recovery from panic]",
 						zap.Any("error", err),
