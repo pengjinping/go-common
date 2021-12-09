@@ -109,7 +109,7 @@ func Init(customConf *ConfigType) {
 	config.SetConfigType("yaml")
 	err := config.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 	config.WatchConfig()
 
