@@ -18,42 +18,56 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 路由组的函数类型
+type RouterDefine func(Router *gin.RouterGroup)
+
+// 路由组 所用的 action 函数组
+type HandlerFuncGroup []func() gin.HandlerFunc
+
+// 路由组的预定义结构
 type routerConfig struct {
-	MiddlewareGroupName string
-	RouterFunc          config.RouterDefine
+	MiddlewareGroup HandlerFuncGroup
+	RouterFunc      RouterDefine
 }
 
 var routerGroups = make(map[string]routerConfig)
 
 func Init() *gin.Engine {
-	Router := gin.Default()
+	e := gin.Default()
 
 	if exists, err := utils.PathExists("./templates"); err == nil && exists {
-		Router.LoadHTMLGlob("templates/*")
+		e.LoadHTMLGlob("templates/*")
 	}
 
-	Router.GET("/health", func(c *gin.Context) {
+	e.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"success": true,
 		})
 	})
 
-	// 通过 Register注册路由组, 以及各组路由对应的中间件组
+	// 向 gin 引擎中注册预设的路由组, 以及各组路由对应的中间件组
 	for basePath, config := range routerGroups {
-		group := Router.Group(basePath)
-		ApplyMiddlewareGroup(group, config.MiddlewareGroupName)
-		(*config.RouterFunc)(group)
+		group := e.Group(basePath)
+		ApplyMiddleware(group, config.MiddlewareGroup)
+		(config.RouterFunc)(group)
 	}
 
-	return Router
+	return e
+}
+
+// 为 路由组 注册 中间件组
+func ApplyMiddleware(e *gin.RouterGroup, g HandlerFuncGroup) {
+	for _, f := range g {
+		e.Use(f())
+	}
 }
 
 // Register 注册路由地址
-// @param middlewareGroupname 中间件组的名称，如：web、api、openAPI、publicWeb...等。详见 mw_group.go 中的定义。
-// 若没找到合适的中间件组，可以先调用 web.AddToMiddlewareGroup() 来注册自己的组。
-func Register(basePath string, middlewareGroupname string, routerFunc func(Router *gin.RouterGroup)) {
-	routerGroups[basePath] = routerConfig{middlewareGroupname, &routerFunc}
+// @param middlewareGroup 中间件组，默认提供的如：Web、API、OpenAPI、PublicWeb...等。详见 middleware.Group 中的定义。
+// 若没找到合适的中间件组，可以传入自己的组。
+func Register(basePath string, middlewareGroup HandlerFuncGroup, routerFunc RouterDefine) {
+	routerGroups[basePath] = routerConfig{middlewareGroup, routerFunc}
 }
 
 func Start(e *gin.Engine) {
@@ -66,10 +80,10 @@ func Start(e *gin.Engine) {
 	}
 
 	go func() {
-		log.Printf("启动服务器, 端口： %d", port)
+		log.Printf("启动服务器, 端口：%d", port)
 
 		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
-			log.Printf("Listen: %s\n", err)
+			log.Printf("Listen %s\n", err)
 		}
 	}()
 

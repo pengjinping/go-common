@@ -1,9 +1,5 @@
 package config
 
-import (
-	"github.com/gin-gonic/gin"
-)
-
 type ConfigType map[string]interface{}
 
 type defaultConfig struct {
@@ -15,8 +11,6 @@ type defaultConfig struct {
 	Zap    ZapConfig    `mapstructure:"zap" json:"zap" yaml:"zap"`
 	Debug  bool         `json:"Debug" yaml:"debug"`
 }
-
-type RouterDefine *func(Router *gin.RouterGroup)
 
 type ServerConfig struct {
 	Name string `mapstructure:"name" json:"name"`
@@ -33,10 +27,10 @@ type MysqlConfig struct {
 }
 
 type RedisConfig struct {
-	Host       string        `mapstructure:"host" json:"host"`
-	Port       int           `mapstructure:"port" json:"port"`
-	Password   string        `mapstructure:"password" json:"password"`
-	DBName     int           `mapstructure:"dbname" json:"dbname"`
+	Host     string `mapstructure:"host" json:"host"`
+	Port     int    `mapstructure:"port" json:"port"`
+	Password string `mapstructure:"password" json:"password"`
+	DBName   int    `mapstructure:"dbname" json:"dbname"`
 }
 
 type CacheConfig struct {

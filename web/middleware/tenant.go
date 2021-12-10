@@ -1,4 +1,4 @@
-package web
+package middleware
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"git.kuainiujinke.com/oa/oa-common/cache"
 	"git.kuainiujinke.com/oa/oa-common/database"
 	"git.kuainiujinke.com/oa/oa-common/model"
+	"git.kuainiujinke.com/oa/oa-common/web"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +43,7 @@ func (provider *OaTenantProvider) TenantUUIDResolver(ctx *gin.Context) string {
 	return ctx.Request.Host
 }
 
-func TenantMiddleware() gin.HandlerFunc {
+func Tenant() gin.HandlerFunc {
 	// 初始化平台和租户连接
 	return func(c *gin.Context) {
 		uuid := new(OaTenantProvider).TenantUUIDResolver(c)
@@ -58,7 +59,7 @@ func TenantMiddleware() gin.HandlerFunc {
 			c.Set("DB", db)
 			c.Next()
 		} else {
-			FailWithMessage(http.StatusNotImplemented, "不存在的租户:"+uuid, c)
+			web.FailWithMessage(http.StatusNotImplemented, "不存在的租户:"+uuid, c)
 			c.Abort()
 			return
 		}

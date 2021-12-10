@@ -1,4 +1,4 @@
-package web
+package middleware
 
 import (
 	"net"
@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func AuditMiddleware() gin.HandlerFunc {
+func Audit() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -39,7 +39,7 @@ func AuditMiddleware() gin.HandlerFunc {
 	}
 }
 
-func RecoveryMiddleware() gin.HandlerFunc {
+func Recovery() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {

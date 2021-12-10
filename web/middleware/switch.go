@@ -1,10 +1,10 @@
-package web
+package middleware
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
-func SwitchMiddleware() gin.HandlerFunc {
+func Switch() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 	}

@@ -1,4 +1,4 @@
-package web
+package middleware
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 
 	"git.kuainiujinke.com/oa/oa-common/config"
 	"git.kuainiujinke.com/oa/oa-common/logger"
+	"git.kuainiujinke.com/oa/oa-common/web"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
@@ -50,19 +51,19 @@ func newParser() *jwt.Parser {
 }
 
 // api请求认证
-func ApiAuthMiddleware() gin.HandlerFunc {
+func ApiAuth() gin.HandlerFunc {
 	sk := []byte(config.GetString("jwt.signing-key"))
 	return func(c *gin.Context) {
 		tok, err := ParseToken(c.Request, sk)
 
 		if err != nil {
 			logger.Error(c, err.Error())
-			FailWithMessage(http.StatusUnauthorized, "登录token无效", c)
+			web.FailWithMessage(http.StatusUnauthorized, "登录token无效", c)
 			c.Abort()
 			return
 		}
 		if tok == nil || !tok.Valid {
-			FailWithMessage(http.StatusUnauthorized, "登录token无效", c)
+			web.FailWithMessage(http.StatusUnauthorized, "登录token无效", c)
 			c.Abort()
 			return
 		}

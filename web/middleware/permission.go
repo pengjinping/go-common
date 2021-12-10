@@ -1,10 +1,11 @@
-package web
+package middleware
 
 import (
 	"net/http"
 	"time"
 
 	"git.kuainiujinke.com/oa/oa-common/logger"
+	"git.kuainiujinke.com/oa/oa-common/web"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -15,7 +16,7 @@ type Abilities struct {
 	Name string `json:"name"`
 }
 
-func PermissionMiddleware() gin.HandlerFunc {
+func Permission() gin.HandlerFunc {
 	// 顶一个带过期时间的用户权限结构体
 	type EmployeesPermission struct {
 		Expired       int
@@ -42,7 +43,7 @@ func PermissionMiddleware() gin.HandlerFunc {
 		Db, exists := c.Get("DB")
 		if !exists {
 			logger.Error(c, "租户[%s]数据库连接不存在", zap.Any("host", c.Request.Host))
-			FailWithMessage(http.StatusUnauthorized, "无效的租户数据库连接", c)
+			web.FailWithMessage(http.StatusUnauthorized, "无效的租户数据库连接", c)
 			c.Abort()
 			return
 		}
@@ -51,7 +52,7 @@ func PermissionMiddleware() gin.HandlerFunc {
 		userIdMix, e2 := c.Get("userId")
 		if !e1 || !e2 {
 			logger.Error(c, "授权用户权限:用户不存在")
-			FailWithMessage(http.StatusUnauthorized, "登录已失效", c)
+			web.FailWithMessage(http.StatusUnauthorized, "登录已失效", c)
 			c.Abort()
 			return
 		}
@@ -75,7 +76,7 @@ func PermissionMiddleware() gin.HandlerFunc {
 		if _, ok := employeePermission.permissionMap[url]; ok {
 			c.Next()
 		} else {
-			FailWithMessage(http.StatusForbidden, "禁止访问", c)
+			web.FailWithMessage(http.StatusForbidden, "禁止访问", c)
 			c.Abort()
 			return
 		}
