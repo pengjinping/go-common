@@ -1,8 +1,6 @@
 package config
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +37,6 @@ type RedisConfig struct {
 	Port       int           `mapstructure:"port" json:"port"`
 	Password   string        `mapstructure:"password" json:"password"`
 	DBName     int           `mapstructure:"dbname" json:"dbname"`
-	Expiration time.Duration `mapstructure:"expiration" json:"expiration"`
 }
 
 type CacheConfig struct {

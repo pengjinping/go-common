@@ -14,7 +14,6 @@ redis:
   port: 6379
   password: 123456
   dbname: 0
-  expiration: 300
 cache:
   driver: memory
 jwt:

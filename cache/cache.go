@@ -12,8 +12,8 @@ import (
 var Stores = make(map[string]StoreInterface)
 
 type Cache struct {
-	driver string // 缓存驱动
-	name   string // 缓存前缀 租户标识
+	driver string 			// 缓存驱动
+	name   string 			// 缓存前缀 租户标识
 	store  StoreInterface
 }
 
@@ -24,22 +24,22 @@ type StoreInterface interface {
 	Delete(key string)                    	 	 // 删除key
 	Has(key string) bool             			 // 判断key是否存在
 	IsExpire(key string) bool          			 // 判断key是否过期
+	GC()										 // 随机删除已过期key
 }
 
 func Init() {
 	// 需要使用的时候直接获取，没有注入到全局变量中
 	driver := getConfigCacheDriver()
-	Register(driver)
+	register(driver)
 }
 
-func Register(driver string) {
-	driver = strings.ToLower(driver)
-
+func register(driver string) {
 	var store StoreInterface
 	if driver == "redis" {
 		store = NewRedisStore()
 	} else if driver == "memory" {
 		store = NewMemoryStore()
+		go store.GC()			// 开启一个协成 清理过期缓存数据
 	} else {
 		log.Printf("缓存驱动 \"%s\" 不存在. 可选择的缓存驱动: memory, redis\n", driver)
 		return
@@ -58,8 +58,7 @@ func getConfigCacheDriver() string {
 	if err := config.UnmarshalKey("Cache", &conf); err != nil {
 		fmt.Printf("Cache config init failed: %v\n", err)
 	}
-
-	driver := strings.ToLower(conf.Driver)
+	driver := conf.Driver
 	if len(driver) <= 0 {
 		driver = "memory"
 	}
@@ -73,6 +72,8 @@ func GetDefault(ctx context.Context) *Cache {
 }
 
 func GetByDriver(ctx context.Context, driver string) *Cache {
+	driver = strings.ToLower(driver)
+
 	var ca *Cache
 	ca, tenant := getTenant(ctx)
 	if ca != nil && ca.driver == driver {
@@ -80,8 +81,9 @@ func GetByDriver(ctx context.Context, driver string) *Cache {
 	}
 
 	if _, ok := Stores[driver]; !ok {
-		Register(driver)
+		register(driver)
 	}
+
 	return &Cache{
 		driver: driver,
 		name:   tenant,

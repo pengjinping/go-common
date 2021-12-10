@@ -10,8 +10,7 @@ import (
 )
 
 type RedisStore struct {
-	pool              *redis.Pool
-	defaultExpiration time.Duration
+	pool *redis.Pool
 }
 
 func NewRedisStore() *RedisStore {
@@ -20,7 +19,7 @@ func NewRedisStore() *RedisStore {
 		fmt.Printf("Redis config init failed: %v\n", err)
 	}
 	address := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
-	fmt.Printf("%s Redis连接信息: %s - ", timeHelper.FormatDateTime(time.Now()), address)
+	fmt.Printf("%s Redis [%s] ", timeHelper.FormatDateTime(time.Now()), address)
 
 	pool := &redis.Pool{
 		MaxActive:   512,
@@ -75,9 +74,9 @@ func NewRedisStore() *RedisStore {
 	if err := conn.Err(); err != nil {
 		return nil
 	}
-	fmt.Println("success")
+	fmt.Println("connected success")
 
-	return &RedisStore{pool: pool, defaultExpiration: conf.Expiration}
+	return &RedisStore{pool: pool}
 }
 
 func (c *RedisStore) Set(key string, value interface{}, t int) {
@@ -91,7 +90,6 @@ func (c *RedisStore) Set(key string, value interface{}, t int) {
 		conn.Do("set", key, string(out))
 	}
 }
-
 func (c *RedisStore) Forever(key string, value interface{}) {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -99,7 +97,6 @@ func (c *RedisStore) Forever(key string, value interface{}) {
 	out, _ := serialize.Marshal(value) //序列化操作，序列化可以保存对象
 	conn.Do("set", key, string(out))
 }
-
 func (c *RedisStore) Get(key string) interface{} {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -119,7 +116,6 @@ func (c *RedisStore) Delete(key string) {
 
 	conn.Do("del", key)
 }
-
 func (c *RedisStore) IsExpire(key string) bool {
 	conn := c.pool.Get()
 	defer conn.Close()
@@ -131,7 +127,9 @@ func (c *RedisStore) IsExpire(key string) bool {
 
 	return true
 }
-
 func (c *RedisStore) Has(key string) bool {
 	return !c.IsExpire(key)
+}
+
+func (c *RedisStore) GC() {
 }
