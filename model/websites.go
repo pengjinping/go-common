@@ -6,7 +6,7 @@ import (
 
 type Websites struct {
 	BaseModel
-	Id   uint   `gorm:"primarykey"`
+	ID   uint   `gorm:"primarykey"`
 	Name string `json:"name" gorm:"comment:name"`
 	UUID string `json:"uuid" gorm:"comment:uuid"`
 }
