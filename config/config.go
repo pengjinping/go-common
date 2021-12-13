@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	SystemTenant   = "platform"
 	ConfigEnv      = "GIN_MODE"
 	ConfigDir      = "./deployment/"
 	DevConfigFile  = "application-dev.yaml"

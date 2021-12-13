@@ -68,7 +68,7 @@ func Tenant() gin.HandlerFunc {
 
 		// 切换缓存
 		if ca := cache.GetDefault(c); ca != nil {
-			c.Set("Cache", ca)
+			c.Set("cache", ca)
 		}
 
 		// 切换数据库
