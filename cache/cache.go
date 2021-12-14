@@ -3,10 +3,9 @@ package cache
 import (
 	"context"
 	"fmt"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"log"
 	"strings"
-
-	"git.kuainiujinke.com/oa/oa-common-golang/config"
 )
 
 var Stores = make(map[string]StoreInterface)
@@ -17,45 +16,69 @@ type Cache struct {
 }
 
 type StoreInterface interface {
-	GetTenant() string                           // 获取租户信息
-	SetTenant(tenant string, tenantId int) bool  // 设置连接库DB
+	Tenant() string                              // 获取租户UUID
+	SetTenant(tenant string, tenantId uint) bool  // 设置连接库DB
 	Set(key string, value interface{}, time int) // 设置缓存带过期时间
 	Forever(key string, value interface{})       // 设置永久缓存无过期时间
 	Get(key string) interface{}                  // 获取缓存数据
 	Delete(key string)                           // 删除key
 	Has(key string) bool                         // 判断key是否存在
 	IsExpire(key string) bool                    // 判断key是否过期
-	GC()                                         // 随机删除已过期key
 	Keys() interface{}                           // 获取所有key
 }
 
+// Init 初始化缓存
 func Init() {
 	// 需要使用的时候直接获取，没有注入到全局变量中
-	driver := getConfigCacheDriver()
+	driver := configDriver()
 	register(driver)
 }
 
-func register(driver string) {
-	var store StoreInterface
-	if driver == "redis" {
-		store = NewRedisStore(config.SystemTenant)
-	} else if driver == "memory" {
-		store = NewMemoryStore(config.SystemTenant)
-		go store.GC() // 开启一个协成 清理过期缓存数据
-	} else {
-		log.Printf("缓存驱动 \"%s\" 不存在. 可选择的缓存驱动: memory, redis\n", driver)
-		return
+// GetDefault 获取默认驱动缓存实例
+func GetDefault(ctx context.Context) *Cache {
+	return GetByDriver(ctx, configDriver())
+}
+
+// GetByDriver 获取指定驱动缓存实例: redis memory
+func GetByDriver(ctx context.Context, driver string) *Cache {
+	driver = strings.ToLower(driver)
+	ca, tenant := CtxCache(ctx)
+
+	if ca == nil || ca.driver != driver {
+		register(driver)
+
+		ca = &Cache{
+			driver: driver,
+			store:  Stores[driver],
+		}
 	}
 
+	ca.SetTenant(ctx, tenant)
+	return ca
+}
+
+// 实例化一个缓存， 放入缓存池中
+func register(driver string) {
 	if _, ok := Stores[driver]; ok {
 		return
 	}
 
+	var store StoreInterface
+	if driver == "redis" {
+		store = NewRedisStore(config.PlatformAlias)
+	} else if driver == "memory" {
+		store = NewMemoryStore(config.PlatformAlias)
+	} else {
+		log.Printf("cache driver \"%s\" not exists. you can change driver is: memory, redis\n", driver)
+		return
+	}
+
 	Stores[driver] = store
-	log.Printf("Cache driver \"%s\" connected success.", driver)
+	log.Printf("cache driver \"%s\" connected success.", driver)
 }
 
-func getConfigCacheDriver() string {
+// 获取配置的缓存驱动
+func configDriver() string {
 	var conf config.CacheConfig
 	if err := config.UnmarshalKey("Cache", &conf); err != nil {
 		fmt.Printf("Cache config init failed: %v\n", err)
@@ -68,60 +91,43 @@ func getConfigCacheDriver() string {
 	return driver
 }
 
-func GetDefault(ctx context.Context) *Cache {
-	driver := getConfigCacheDriver()
-	return GetByDriver(ctx, driver)
-}
-
-func GetByDriver(ctx context.Context, driver string) *Cache {
-	driver = strings.ToLower(driver)
-
-	var ca *Cache
-	ca, tenant, siteID := cacheTenant(ctx)
-	if ca == nil || ca.driver != driver {
-		if _, ok := Stores[driver]; !ok {
-			register(driver)
-		}
-
-		ca = &Cache{
-			driver: driver,
-			store:  Stores[driver],
-		}
-	}
-
-	ca.SetTenant(tenant, siteID)
-	return ca
-}
-
-func cacheTenant(ctx context.Context) (*Cache, string, int) {
+func CtxCache(ctx context.Context) (*Cache, string) {
 	var ca *Cache
 	if caName := ctx.Value("cache"); caName != nil {
 		ca = caName.(*Cache)
 	}
 
-	tenant := config.SystemTenant
+	tenant := config.PlatformAlias
 	if tenantName := ctx.Value("tenant"); tenantName != nil {
 		tenant = tenantName.(string)
 	}
 
-	siteID := 0
-	if tenantIdName := ctx.Value("siteID"); tenantIdName != nil {
-		siteID = tenantIdName.(int)
-	}
-
-	return ca, tenant, siteID
+	return ca, tenant
 }
 
 /** 结构体方法 */
 
-func (c *Cache) GetStoreName() string {
+func (c *Cache) Driver() string {
 	return c.driver
 }
-func (c *Cache) GetTenant() string {
-	return c.store.GetTenant()
+func (c *Cache) Tenant() string {
+	return c.store.Tenant()
 }
-func (c *Cache) SetTenant(tenant string, tenantId int) bool {
-	return c.store.SetTenant(tenant, tenantId)
+
+func (c *Cache) Platform() bool {
+	return c.store.SetTenant(config.PlatformAlias, 0)
+}
+
+func (c *Cache) SetTenant(ctx context.Context, tenant string) bool {
+	if len(tenant) == 0 {
+		_, tenant = CtxCache(ctx)
+	}
+
+	// TODO 不可使用
+	/*site := model.NewWebSites(ctx).ByUUID("uuid")
+	site := 1;*/
+
+	return c.store.SetTenant(tenant, 1)
 }
 
 func (c *Cache) Set(key string, value interface{}, time int) {

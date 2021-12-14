@@ -2,7 +2,7 @@ package model
 
 import (
 	"context"
-
+	"git.kuainiujinke.com/oa/oa-common-golang/cache"
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/database"
 	"git.kuainiujinke.com/oa/oa-common-golang/logger"
@@ -14,6 +14,7 @@ import (
 // (属性名故意写得很长，以减少和 table 业务字段重名的概率)
 type BaseModel struct {
 	dbConnection   *gorm.DB
+	cacheConn      *cache.Cache
 	forcePlatform  bool
 	currentContext context.Context
 }
@@ -23,6 +24,7 @@ type BaseModel struct {
 func (m *BaseModel) UsePlatform() {
 	m.forcePlatform = true
 	m.dbConnection = nil
+	m.cacheConn.Platform()
 }
 
 // 指定使用【传入的】租户库
@@ -31,6 +33,7 @@ func (m *BaseModel) UseTenant(tenantUUID string) {
 	m.forcePlatform = false
 	db := database.ByName(m.currentContext, tenantUUID)
 	m.dbConnection = db
+	m.cacheConn.SetTenant(m.currentContext, tenantUUID)
 }
 
 // 指定使用【默认的】库 (从 ctx 中推断)
@@ -39,6 +42,7 @@ func (m *BaseModel) UseTenant(tenantUUID string) {
 func (m *BaseModel) UseDefault() {
 	m.forcePlatform = false
 	m.dbConnection = nil
+	m.cacheConn.SetTenant(m.currentContext, "")
 }
 
 // 获取默认的 db 连接
@@ -59,4 +63,9 @@ func (m *BaseModel) DB() *gorm.DB {
 	}
 	m.dbConnection = db
 	return db
+}
+
+// 获取默认的 Cache 连接
+func (m *BaseModel) Cache() *cache.Cache {
+	return m.cacheConn
 }
