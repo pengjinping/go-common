@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-go-common/config"
-	"git.kuainiujinke.com/oa/oa-go-common/utils"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/utils"
 
 	"fmt"
 

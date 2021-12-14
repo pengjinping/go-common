@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-go-common/logger"
-	"git.kuainiujinke.com/oa/oa-go-common/web"
+	"git.kuainiujinke.com/oa/oa-common-golang/logger"
+	"git.kuainiujinke.com/oa/oa-common-golang/web"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

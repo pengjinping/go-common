@@ -1,5 +1,5 @@
 main.*
-oa-go-common
+oa-common-golang
 workspace*
 /log/
 /deployment/

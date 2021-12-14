@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"git.kuainiujinke.com/oa/oa-go-common/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
 )
 
 var Stores = make(map[string]StoreInterface)

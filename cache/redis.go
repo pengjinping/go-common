@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-go-common/config"
-	timeHelper "git.kuainiujinke.com/oa/oa-go-common/utils/time"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	timeHelper "git.kuainiujinke.com/oa/oa-common-golang/utils/time"
 	"github.com/garyburd/redigo/redis"
 	"github.com/techoner/gophp/serialize"
 )
