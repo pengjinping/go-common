@@ -33,7 +33,7 @@ func DB(ctx context.Context) *gorm.DB {
 
 // 根据 DB名称，获取一个 db 连接会话
 // 若上下文连接池中已有，则会复用之
-// 若是平台库，dbName 固定传为 “platform”
+// 若是平台库，dbName 固定传常量：config.PlatformAlias
 func ByName(ctx context.Context, dbName string) *gorm.DB {
 	if db := FromCtx(ctx, dbName); db != nil {
 		return db
