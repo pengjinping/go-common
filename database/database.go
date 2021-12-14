@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"git.kuainiujinke.com/oa/oa-common/config"
+	"git.kuainiujinke.com/oa/oa-go-common/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

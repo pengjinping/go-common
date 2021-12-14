@@ -3,9 +3,9 @@ package model
 import (
 	"context"
 
-	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/database"
-	"git.kuainiujinke.com/oa/oa-common/logger"
+	"git.kuainiujinke.com/oa/oa-go-common/config"
+	"git.kuainiujinke.com/oa/oa-go-common/database"
+	"git.kuainiujinke.com/oa/oa-go-common/logger"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

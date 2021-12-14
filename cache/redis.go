@@ -2,12 +2,13 @@ package cache
 
 import (
 	"fmt"
-	"git.kuainiujinke.com/oa/oa-common/config"
-	timeHelper "git.kuainiujinke.com/oa/oa-common/utils/time"
-	"github.com/garyburd/redigo/redis"
-	"github.com/techoner/gophp/serialize"
 	"log"
 	"time"
+
+	"git.kuainiujinke.com/oa/oa-go-common/config"
+	timeHelper "git.kuainiujinke.com/oa/oa-go-common/utils/time"
+	"github.com/garyburd/redigo/redis"
+	"github.com/techoner/gophp/serialize"
 )
 
 type RedisStore struct {
@@ -77,7 +78,7 @@ func (c *RedisStore) SetTenant(tenant string, tenantId int) bool {
 	c.UUID = tenant
 	if tenantId != 0 {
 		c.DB = tenantId
-	}else {
+	} else {
 		var conf config.RedisConfig
 		if err := config.UnmarshalKey("Redis", &conf); err != nil {
 			fmt.Printf("Redis config init failed: %v\n", err)

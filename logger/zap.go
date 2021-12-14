@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/utils"
+	"git.kuainiujinke.com/oa/oa-go-common/config"
+	"git.kuainiujinke.com/oa/oa-go-common/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/natefinch/lumberjack"

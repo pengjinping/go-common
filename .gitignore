@@ -1,5 +1,5 @@
 main.*
-oa-common
+oa-go-common
 workspace*
 /log/
 /deployment/

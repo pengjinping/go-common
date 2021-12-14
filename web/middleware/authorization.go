@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/logger"
-	"git.kuainiujinke.com/oa/oa-common/web"
+	"git.kuainiujinke.com/oa/oa-go-common/config"
+	"git.kuainiujinke.com/oa/oa-go-common/logger"
+	"git.kuainiujinke.com/oa/oa-go-common/web"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
