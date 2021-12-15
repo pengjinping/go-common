@@ -58,12 +58,12 @@ func ApiAuth() gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error(c, err.Error())
-			web.FailWithMessage(http.StatusUnauthorized, "登录token无效", c)
+			web.FailWithMessage("登录token无效", c)
 			c.Abort()
 			return
 		}
 		if tok == nil || !tok.Valid {
-			web.FailWithMessage(http.StatusUnauthorized, "登录token无效", c)
+			web.FailWithMessage("登录token无效", c)
 			c.Abort()
 			return
 		}

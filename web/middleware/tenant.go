@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"net/http"
 	"strings"
 
 	"git.kuainiujinke.com/oa/oa-common/cache"
@@ -75,7 +74,7 @@ func Tenant() gin.HandlerFunc {
 		if db := database.DB(c); db != nil {
 			c.Next()
 		} else {
-			web.FailWithMessage(http.StatusNotImplemented, "不存在的租户:"+uuid, c)
+			web.FailWithMessage("不存在的租户:"+uuid, c)
 			c.Abort()
 			return
 		}

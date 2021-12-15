@@ -46,10 +46,14 @@ func Fail(c *gin.Context) {
 	Result(ERROR, map[string]interface{}{}, "操作失败", c)
 }
 
-func FailWithMessage(code int, message string, c *gin.Context) {
-	Result(code, map[string]interface{}{}, message, c)
+func FailWithMessage(message string, c *gin.Context) {
+	Result(ERROR, map[string]interface{}{}, message, c)
 }
 
-func FailWithDetailed(code int, message string, data interface{}, c *gin.Context) {
-	Result(code, data, message, c)
+func FailWithDetailed(message string, data interface{}, c *gin.Context) {
+	Result(ERROR, data, message, c)
+}
+
+func FailWithCodeAndMessage(code int,message string, c *gin.Context) {
+	Result(code, map[string]interface{}{}, message, c)
 }

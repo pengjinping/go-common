@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"net/http"
 	"time"
 
 	"git.kuainiujinke.com/oa/oa-common/logger"
@@ -43,7 +42,7 @@ func Permission() gin.HandlerFunc {
 		Db, exists := c.Get("DB")
 		if !exists {
 			logger.Error(c, "租户[%s]数据库连接不存在", zap.Any("host", c.Request.Host))
-			web.FailWithMessage(http.StatusUnauthorized, "无效的租户数据库连接", c)
+			web.FailWithMessage("无效的租户数据库连接", c)
 			c.Abort()
 			return
 		}
@@ -52,7 +51,7 @@ func Permission() gin.HandlerFunc {
 		userIdMix, e2 := c.Get("userId")
 		if !e1 || !e2 {
 			logger.Error(c, "授权用户权限:用户不存在")
-			web.FailWithMessage(http.StatusUnauthorized, "登录已失效", c)
+			web.FailWithMessage("登录已失效", c)
 			c.Abort()
 			return
 		}
@@ -76,7 +75,7 @@ func Permission() gin.HandlerFunc {
 		if _, ok := employeePermission.permissionMap[url]; ok {
 			c.Next()
 		} else {
-			web.FailWithMessage(http.StatusForbidden, "禁止访问", c)
+			web.FailWithMessage( "禁止访问", c)
 			c.Abort()
 			return
 		}
