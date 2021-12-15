@@ -123,9 +123,9 @@ func (c *Cache) SetTenant(ctx context.Context, tenant string) bool {
 		_, tenant = CtxCache(ctx)
 	}
 
-	// TODO 不可使用
-	/*site := model.NewWebSites(ctx).ByUUID("uuid")
-	site := 1;*/
+	if _, ok := config.WebSite[tenant]; !ok {
+		log.Printf("租户%s不存在，切换租户失败", tenant)
+	}
 
 	return c.store.SetTenant(tenant, 1)
 }

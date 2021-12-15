@@ -55,9 +55,22 @@ func (provider *OaTenantProvider) TenantUUIDResolver(ctx *gin.Context) string {
 	return h
 }
 
+// 设置所有租户信息  [UUID]ID
+func (provider *OaTenantProvider) ConfigWebsite() {
+	if _, ok := config.WebSite[config.PlatformAlias]; !ok {
+		config.WebSite[config.PlatformAlias] = 0
+		tenants := provider.TenantsProvider()
+		for _, item := range tenants {
+			config.WebSite[item.UUID] = int(item.ID)
+		}
+	}
+}
+
 func Tenant() gin.HandlerFunc {
 	// 初始化平台和租户连接
 	return func(c *gin.Context) {
+		new(OaTenantProvider).ConfigWebsite()
+
 		// 初始化【本请求专用的】db连接池
 		c.Set(database.CtxPoolKey, make(database.DBPool))
 

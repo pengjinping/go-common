@@ -51,3 +51,6 @@ type ZapConfig struct {
 type JWTConfig struct {
 	SigningKey string `mapstructure:"signing-key" json:"signing-key"`
 }
+
+// 用于存储各个租户列表信息
+var WebSite = make(map[string]int)

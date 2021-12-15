@@ -28,4 +28,7 @@ func Init(c *config.ConfigType) {
 
 	//3. 初始化缓存
 	cache.Init()
+
+	//4. 初始化租户信息
+	//web.InitWebsite()
 }
