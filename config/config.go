@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -117,7 +118,9 @@ func Init(customConf *ConfigType) {
 	config.SetEnvPrefix(config.GetString("envPrefix"))
 	config.AutomaticEnv()
 
-	config.MergeConfigMap(*customConf)
+	if err := config.MergeConfigMap(*customConf); err != nil {
+		log.Printf("合并配置信息失败")
+	}
 
 	if GetBool("Debug") {
 		j, _ := json.Marshal(config.AllSettings())

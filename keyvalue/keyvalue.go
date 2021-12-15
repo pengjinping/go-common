@@ -23,7 +23,7 @@ type KeyValue struct {
  *
  *	kv2 := kv.Key("employee.roster_download_except").Map()
  *
- *	// 切换获取平台和当前租户 Platform()  Tenant(c)
+ *	// 切换获取平台和当前租户 Platform()  Tenant()
  *	kv := keyvalue.NewKeyValue(c).Platform().Key("workbenchApps").Bool()
  *  或者
  *  kv := keyvalue.NewKeyValue(c)
@@ -31,7 +31,7 @@ type KeyValue struct {
  *	kv3 := kv.Key("workbenchApps").Bool()
  *
  *	// 切回到当前租户KV
- *  kv.Platform(c)
+ *  kv.Platform()
  */
 
 func NewKeyValue(ctx context.Context) *KeyValue {

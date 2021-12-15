@@ -8,16 +8,48 @@ import (
 	"strings"
 )
 
+/**
+	// 获取本次请求的默认缓存 【支持多租户分组】
+	ca := cache.Get(c)
+	ca := cache.GetByDriver(c, "memory")	// 也可以指定驱动 如: 指定缓存驱动示例
+
+	ca.Driver()		// 获取缓存驱动名称
+	ca.Tenant() 	// 获取缓存租户uuid
+
+	// 切换租户信息
+	ca.UsePlatform()     // 切换到平台
+	ca.UseDefault()   	 // 切回当前租户
+	ca.UseTenant(uuid)   // 切换到指定租户
+
+	// 设置缓存，有有效期 单位是s  当时间为0时 是永久有效 等于Forever
+	ca.Set("AA", "ABC", 2)
+	ca.Forever("AA", "SSSS")	// 设置永久缓存
+
+	ca.Get("AA")		// 获取缓存
+	ca.Has("AA")		// 是否存在
+	ca.IsExpire("AA")	// 是否过期
+	ca.Delete("AA")		// 删除缓存
+	ca.Keys()			// 获取所有缓存keys
+
+	// 缓存支持闭包函数 在闭包中可以通过后面的参数传进去 不要使用全局变量防止数据污染
+	res := ca.Remember("key", 5, func(args ...interface{}) (interface{}, error) {
+		a := args[0].(int)
+		b := args[1].(int)
+		return a + b + 456, nil
+	}, 4, 500)
+*/
+
 var Stores = make(map[string]StoreInterface)
 
 type Cache struct {
-	driver string // 缓存驱动
-	store  StoreInterface
+	driver         string // 缓存驱动
+	currentContext context.Context
+	store          StoreInterface
 }
 
 type StoreInterface interface {
 	Tenant() string                              // 获取租户UUID
-	SetTenant(tenant string, tenantId uint) bool  // 设置连接库DB
+	SetTenant(tenant string, tenantId int) bool  // 设置连接库DB
 	Set(key string, value interface{}, time int) // 设置缓存带过期时间
 	Forever(key string, value interface{})       // 设置永久缓存无过期时间
 	Get(key string) interface{}                  // 获取缓存数据
@@ -34,27 +66,46 @@ func Init() {
 	register(driver)
 }
 
-// GetDefault 获取默认驱动缓存实例
-func GetDefault(ctx context.Context) *Cache {
-	return GetByDriver(ctx, configDriver())
+// Get 获取默认驱动缓存实例
+func Get(ctx context.Context) *Cache {
+	return ByDriver(ctx, configDriver())
 }
 
-// GetByDriver 获取指定驱动缓存实例: redis memory
-func GetByDriver(ctx context.Context, driver string) *Cache {
+// ByDriver 获取指定驱动缓存实例: redis memory
+func ByDriver(ctx context.Context, driver string) *Cache {
 	driver = strings.ToLower(driver)
-	ca, tenant := CtxCache(ctx)
+
+	var ca *Cache
+	if caName := ctx.Value("cache"); caName != nil {
+		ca = caName.(*Cache)
+	}
 
 	if ca == nil || ca.driver != driver {
 		register(driver)
 
 		ca = &Cache{
-			driver: driver,
-			store:  Stores[driver],
+			driver:         driver,
+			currentContext: ctx,
+			store:          Stores[driver],
 		}
 	}
 
-	ca.SetTenant(ctx, tenant)
+	ca.UseDefault()
 	return ca
+}
+
+// 获取配置的缓存驱动
+func configDriver() string {
+	var conf config.CacheConfig
+	if err := config.UnmarshalKey("Cache", &conf); err != nil {
+		fmt.Printf("Cache config init failed: %v\n", err)
+	}
+	driver := conf.Driver
+	if len(driver) <= 0 {
+		driver = "memory"
+	}
+
+	return driver
 }
 
 // 实例化一个缓存， 放入缓存池中
@@ -77,34 +128,6 @@ func register(driver string) {
 	log.Printf("cache driver \"%s\" connected success.", driver)
 }
 
-// 获取配置的缓存驱动
-func configDriver() string {
-	var conf config.CacheConfig
-	if err := config.UnmarshalKey("Cache", &conf); err != nil {
-		fmt.Printf("Cache config init failed: %v\n", err)
-	}
-	driver := conf.Driver
-	if len(driver) <= 0 {
-		driver = "memory"
-	}
-
-	return driver
-}
-
-func CtxCache(ctx context.Context) (*Cache, string) {
-	var ca *Cache
-	if caName := ctx.Value("cache"); caName != nil {
-		ca = caName.(*Cache)
-	}
-
-	tenant := config.PlatformAlias
-	if tenantName := ctx.Value("tenant"); tenantName != nil {
-		tenant = tenantName.(string)
-	}
-
-	return ca, tenant
-}
-
 /** 结构体方法 */
 
 func (c *Cache) Driver() string {
@@ -114,21 +137,34 @@ func (c *Cache) Tenant() string {
 	return c.store.Tenant()
 }
 
-func (c *Cache) Platform() bool {
-	return c.store.SetTenant(config.PlatformAlias, 0)
+// 切换租户信息
+
+func (c *Cache) UsePlatform() bool {
+	return c.UseTenant(config.PlatformAlias)
 }
 
-func (c *Cache) SetTenant(ctx context.Context, tenant string) bool {
+func (c *Cache) UseDefault() bool  {
+	tenant := config.PlatformAlias
+	if tenantName := c.currentContext.Value("tenant"); tenantName != nil {
+		tenant = tenantName.(string)
+	}
+
+	return c.UseTenant(tenant)
+}
+
+func (c *Cache) UseTenant(tenant string) bool {
 	if len(tenant) == 0 {
-		_, tenant = CtxCache(ctx)
+		log.Printf("租户UUID不可为空")
+		return false
 	}
 
 	if _, ok := config.WebSite[tenant]; !ok {
 		log.Printf("租户%s不存在，切换租户失败", tenant)
 	}
 
-	return c.store.SetTenant(tenant, 1)
+	return c.store.SetTenant(tenant, config.WebSite[tenant])
 }
+
 
 func (c *Cache) Set(key string, value interface{}, time int) {
 	c.store.Set(key, value, time)

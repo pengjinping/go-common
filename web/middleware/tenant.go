@@ -69,17 +69,17 @@ func (provider *OaTenantProvider) ConfigWebsite() {
 func Tenant() gin.HandlerFunc {
 	// 初始化平台和租户连接
 	return func(c *gin.Context) {
-		new(OaTenantProvider).ConfigWebsite()
-
 		// 初始化【本请求专用的】db连接池
 		c.Set(database.CtxPoolKey, make(database.DBPool))
 
+		// 设置所有住户的UUID与ID对应关系
+		new(OaTenantProvider).ConfigWebsite()
+
 		uuid := new(OaTenantProvider).TenantUUIDResolver(c)
 		c.Set("tenant", uuid)
-		// TODO set 租户的 ID
 
 		// 切换缓存
-		if ca := cache.GetDefault(c); ca != nil {
+		if ca := cache.Get(c); ca != nil {
 			c.Set("cache", ca)
 		}
 

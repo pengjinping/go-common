@@ -32,7 +32,7 @@ func (ms *MemoryStore) Tenant() string {
 	return ms.UUID
 }
 
-func (ms *MemoryStore) SetTenant(tenant string, tenantId uint) bool {
+func (ms *MemoryStore) SetTenant(tenant string, tenantId int) bool {
 	ms.UUID = tenant
 
 	if _, ok := expireList[tenant]; !ok {

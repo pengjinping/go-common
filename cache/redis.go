@@ -13,7 +13,7 @@ import (
 
 type RedisStore struct {
 	UUID string // 租户名称
-	DB   uint    // 库DB
+	DB   int    // 库DB
 	pool *redis.Pool
 }
 
@@ -81,7 +81,7 @@ func (c *RedisStore) Tenant() string {
 	return c.UUID
 }
 
-func (c *RedisStore) SetTenant(tenant string, tenantId uint) bool {
+func (c *RedisStore) SetTenant(tenant string, tenantId int) bool {
 	c.UUID = tenant
 	if tenantId != 0 {
 		c.DB = tenantId

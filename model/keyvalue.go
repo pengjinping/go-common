@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"git.kuainiujinke.com/oa/oa-common-golang/cache"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"strings"
 )
 
@@ -25,12 +26,12 @@ func (KeyValue) TableName() string {
 func NewKeyValue(ctx context.Context) *KeyValue {
 	var kv KeyValue
 	kv.currentContext = ctx
-	kv.cacheConn = cache.GetDefault(ctx)
+	kv.cacheConn = cache.Get(ctx)
 	return &kv
 }
 
-func (kv *KeyValue) KeyValue(key string) string {
-	ca := kv.Cache()
+func (m *KeyValue) KeyValue(key string) string {
+	ca := m.Cache()
 	if !ca.IsExpire(key) {
 		return ca.Get(key).(string)
 	}
@@ -47,8 +48,8 @@ func (kv *KeyValue) KeyValue(key string) string {
 		return ""
 	}
 
-	kv.DB().Where(condition).First(&kv)
+	m.DB().Where(condition).First(&m)
+	ca.Set(key, m.Value, config.KeyValueDefaultExpire)
 
-	ca.Set(key, kv.Value, 60)
-	return kv.Value
+	return m.Value
 }
