@@ -1,4 +1,4 @@
-module git.kuainiujinke.com/oa/oa-common
+module git.kuainiujinke.com/oa/oa-common-golang
 
 go 1.17
 

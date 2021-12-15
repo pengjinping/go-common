@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"git.kuainiujinke.com/oa/oa-common/web"
+	"git.kuainiujinke.com/oa/oa-common-golang/web"
 )
 
 type group struct {

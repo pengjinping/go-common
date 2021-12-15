@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/logger"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

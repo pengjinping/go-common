@@ -15,20 +15,24 @@ type MemoryStore struct {
 	mu         sync.RWMutex             //读写锁保证并发读写
 }
 
+// NewMemoryStore 实例化一个内存缓存，并且开启一个协成，用于清理过期数据
 func NewMemoryStore(uuid string) *MemoryStore {
 	expireList[uuid] = list.New()
 
-	return &MemoryStore{
-		UUID:       uuid,
-		list:       make(map[string]*list.Element),
+	store := &MemoryStore{
+		UUID: uuid,
+		list: make(map[string]*list.Element),
 	}
+
+	go store.GC() // 开启一个协成 清理过期缓存数据
+	return store
 }
 
-func (ms *MemoryStore) GetTenant() string {
+func (ms *MemoryStore) Tenant() string {
 	return ms.UUID
 }
 
-func (ms *MemoryStore) SetTenant(tenant string, tenantId int) bool {
+func (ms *MemoryStore) SetTenant(tenant string, tenantId uint) bool {
 	ms.UUID = tenant
 
 	if _, ok := expireList[tenant]; !ok {
@@ -170,6 +174,7 @@ func (ms *MemoryStore) Keys() interface{} {
 func (ms *MemoryStore) setKey(key string) string {
 	return ms.UUID + ":" + key
 }
+
 
 type Memory struct {
 	key    string

@@ -3,8 +3,8 @@ package middleware
 import (
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-common/logger"
-	"git.kuainiujinke.com/oa/oa-common/web"
+	"git.kuainiujinke.com/oa/oa-common-golang/logger"
+	"git.kuainiujinke.com/oa/oa-common-golang/web"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

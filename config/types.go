@@ -30,7 +30,7 @@ type RedisConfig struct {
 	Host     string `mapstructure:"host" json:"host"`
 	Port     int    `mapstructure:"port" json:"port"`
 	Password string `mapstructure:"password" json:"password"`
-	DBName   int    `mapstructure:"dbname" json:"dbname"`
+	DBName   uint   `mapstructure:"dbname" json:"dbname"`
 }
 
 type CacheConfig struct {

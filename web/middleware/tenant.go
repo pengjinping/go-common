@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"git.kuainiujinke.com/oa/oa-common/cache"
-	"git.kuainiujinke.com/oa/oa-common/config"
-	"git.kuainiujinke.com/oa/oa-common/database"
-	"git.kuainiujinke.com/oa/oa-common/model"
-	"git.kuainiujinke.com/oa/oa-common/web"
+	"git.kuainiujinke.com/oa/oa-common-golang/cache"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/database"
+	"git.kuainiujinke.com/oa/oa-common-golang/model"
+	"git.kuainiujinke.com/oa/oa-common-golang/web"
 
 	"github.com/gin-gonic/gin"
 )

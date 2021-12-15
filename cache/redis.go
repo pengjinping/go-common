@@ -2,25 +2,24 @@ package cache
 
 import (
 	"fmt"
-	"git.kuainiujinke.com/oa/oa-common/config"
-	timeHelper "git.kuainiujinke.com/oa/oa-common/utils/time"
-	"github.com/garyburd/redigo/redis"
-	"github.com/techoner/gophp/serialize"
 	"log"
 	"time"
+
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	timeHelper "git.kuainiujinke.com/oa/oa-common-golang/utils/time"
+	"github.com/garyburd/redigo/redis"
+	"github.com/techoner/gophp/serialize"
 )
 
 type RedisStore struct {
 	UUID string // 租户名称
-	DB   int    // 库DB
+	DB   uint    // 库DB
 	pool *redis.Pool
 }
 
+// NewRedisStore 实例化一个redis连接池
 func NewRedisStore(uuid string) *RedisStore {
-	var conf config.RedisConfig
-	if err := config.UnmarshalKey("Redis", &conf); err != nil {
-		fmt.Printf("Redis config init failed: %v\n", err)
-	}
+	conf := Config()
 	address := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	fmt.Printf("%s Redis [%s] ", timeHelper.FormatDateTime(time.Now()), address)
 
@@ -69,26 +68,31 @@ func NewRedisStore(uuid string) *RedisStore {
 	return &RedisStore{pool: pool, UUID: uuid, DB: conf.DBName}
 }
 
-func (c *RedisStore) GetTenant() string {
+func Config() config.RedisConfig {
+	var conf config.RedisConfig
+	if err := config.UnmarshalKey("Redis", &conf); err != nil {
+		fmt.Printf("Redis config init failed: %v\n", err)
+	}
+
+	return conf
+}
+
+func (c *RedisStore) Tenant() string {
 	return c.UUID
 }
 
-func (c *RedisStore) SetTenant(tenant string, tenantId int) bool {
+func (c *RedisStore) SetTenant(tenant string, tenantId uint) bool {
 	c.UUID = tenant
 	if tenantId != 0 {
 		c.DB = tenantId
-	}else {
-		var conf config.RedisConfig
-		if err := config.UnmarshalKey("Redis", &conf); err != nil {
-			fmt.Printf("Redis config init failed: %v\n", err)
-		}
-		c.DB = conf.DBName
+	} else {
+		c.DB = Config().DBName
 	}
 
 	return true
 }
 
-func (c *RedisStore) GetConn() redis.Conn {
+func (c *RedisStore) conn() redis.Conn {
 	conn := c.pool.Get()
 
 	if _, err := conn.Do("SELECT", c.DB); err != nil {
@@ -101,7 +105,7 @@ func (c *RedisStore) GetConn() redis.Conn {
 }
 
 func (c *RedisStore) Set(key string, value interface{}, t int) {
-	conn := c.GetConn()
+	conn := c.conn()
 	defer conn.Close()
 
 	out, _ := serialize.Marshal(value) //序列化操作，序列化可以保存对象
@@ -111,15 +115,17 @@ func (c *RedisStore) Set(key string, value interface{}, t int) {
 		conn.Do("set", key, string(out))
 	}
 }
+
 func (c *RedisStore) Forever(key string, value interface{}) {
-	conn := c.GetConn()
+	conn := c.conn()
 	defer conn.Close()
 
 	out, _ := serialize.Marshal(value) //序列化操作，序列化可以保存对象
 	conn.Do("set", key, string(out))
 }
+
 func (c *RedisStore) Get(key string) interface{} {
-	conn := c.GetConn()
+	conn := c.conn()
 	defer conn.Close()
 
 	reply, err := conn.Do("get", key)
@@ -132,13 +138,13 @@ func (c *RedisStore) Get(key string) interface{} {
 }
 
 func (c *RedisStore) Delete(key string) {
-	conn := c.GetConn()
+	conn := c.conn()
 	defer conn.Close()
 
 	conn.Do("del", key)
 }
 func (c *RedisStore) IsExpire(key string) bool {
-	conn := c.GetConn()
+	conn := c.conn()
 	defer conn.Close()
 
 	b, err := redis.Bool(conn.Do("exists", key))
@@ -153,12 +159,9 @@ func (c *RedisStore) Has(key string) bool {
 }
 
 func (c *RedisStore) Keys() interface{} {
-	conn := c.GetConn()
+	conn := c.conn()
 	defer conn.Close()
 
 	val, _ := redis.Strings(conn.Do("KEYS", "*"))
 	return val
-}
-
-func (c *RedisStore) GC() {
 }
