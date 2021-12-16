@@ -1,51 +1,21 @@
 package middleware
 
 import (
-	"context"
 	"fmt"
-	"git.kuainiujinke.com/oa/oa-common-golang/cache"
-	"git.kuainiujinke.com/oa/oa-common-golang/config"
-	"git.kuainiujinke.com/oa/oa-common-golang/database"
-	"git.kuainiujinke.com/oa/oa-common-golang/logger"
-	"git.kuainiujinke.com/oa/oa-common-golang/model"
-	"git.kuainiujinke.com/oa/oa-common-golang/web"
 	"math/rand"
 	"strings"
 	"time"
 
+	"git.kuainiujinke.com/oa/oa-common-golang/cache"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/database"
+	"git.kuainiujinke.com/oa/oa-common-golang/logger"
+	"git.kuainiujinke.com/oa/oa-common-golang/web"
+
 	"github.com/gin-gonic/gin"
 )
 
-type TenantInfo struct {
-	ID   uint   //租户ID
-	Name string // 数据库连接名称/域名
-	UUID string // 租户UUID
-}
-
-type TenantProvider interface {
-	// 租户的数据提供者
-	TenantsProvider() []TenantInfo
-	// 租户UUID解析器
-	TenantUUIDResolver(*gin.Context) string
-}
-
-type OaTenantProvider struct{}
-
-func (provider *OaTenantProvider) TenantsProvider() []TenantInfo {
-	var websites []model.Websites
-	database.DB(context.TODO()).Find(&websites)
-	tenants := make([]TenantInfo, 0)
-	for _, item := range websites {
-		tenants = append(tenants, TenantInfo{
-			ID:   item.ID,
-			Name: item.Name,
-			UUID: item.UUID,
-		})
-	}
-	return tenants
-}
-
-func (provider *OaTenantProvider) TenantUUIDResolver(ctx *gin.Context) string {
+func TenantUUIDResolver(ctx *gin.Context) string {
 	h := ctx.Request.Host
 	// 若有端口号，去除之
 	if i := strings.Index(h, ":"); i > -1 {
@@ -58,27 +28,13 @@ func (provider *OaTenantProvider) TenantUUIDResolver(ctx *gin.Context) string {
 	return h
 }
 
-// 设置所有租户信息  [UUID]ID
-func (provider *OaTenantProvider) ConfigWebsite() {
-	if _, ok := config.WebSite[config.PlatformAlias]; !ok {
-		config.WebSite[config.PlatformAlias] = 0
-		tenants := provider.TenantsProvider()
-		for _, item := range tenants {
-			config.WebSite[item.UUID] = int(item.ID)
-		}
-	}
-}
-
 func Tenant() gin.HandlerFunc {
 	// 初始化平台和租户连接
 	return func(c *gin.Context) {
 		// 初始化【本请求专用的】db连接池
 		c.Set(database.CtxPoolKey, make(database.DBPool))
 
-		// 设置所有住户的UUID与ID对应关系
-		new(OaTenantProvider).ConfigWebsite()
-
-		uuid := new(OaTenantProvider).TenantUUIDResolver(c)
+		uuid := TenantUUIDResolver(c)
 		c.Set("tenant", uuid)
 
 		// 切换缓存

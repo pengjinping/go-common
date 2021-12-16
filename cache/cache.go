@@ -3,9 +3,11 @@ package cache
 import (
 	"context"
 	"fmt"
-	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"log"
 	"strings"
+
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/tenancy"
 )
 
 /**
@@ -154,15 +156,17 @@ func (c *Cache) UseDefault() bool {
 
 func (c *Cache) UseTenant(tenant string) bool {
 	if len(tenant) == 0 {
-		log.Printf("租户UUID不可为空")
+		log.Printf("缓存：切换租户失败，租户UUID不可为空")
 		return false
 	}
 
-	if _, ok := config.WebSite[tenant]; !ok {
-		log.Printf("租户%s不存在，切换租户失败", tenant)
+	site := tenancy.ByUUID(tenant)
+	if site == nil {
+		log.Printf("缓存：切换租户失败，租户%s不存在", tenant)
+		return false
 	}
 
-	return c.store.SetTenant(tenant, config.WebSite[tenant])
+	return c.store.SetTenant(tenant, int(site.ID))
 }
 
 func (c *Cache) Set(key string, value interface{}, time int) {

@@ -2,9 +2,12 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
+	"git.kuainiujinke.com/oa/oa-common-golang/database"
+	"gorm.io/gorm"
 )
 
 type KeyValue struct {
@@ -21,12 +24,13 @@ func (KeyValue) TableName() string {
 // 注意：
 // 每个 Model 都【必须】有一个对应的 New 方法
 // 1、方便这样的链式调用： model.NewKeyValue(ctx).KeyValue("uuid")
-// 2、若是“默认强制使用平台库”，这里会预设 forcePlatform 为 true
+// 2、若是“默认强制使用平台库”，这里可以预先通过 UsePlatform() 进行设置
 
 func NewKeyValue(ctx context.Context) *KeyValue {
 	var kv KeyValue
 	kv.initModel(ctx)
 	kv.initCache()
+	//kv.UsePlatform() // 强制使用系统库。若无需强制，请删除此行
 	return &kv
 }
 
@@ -52,4 +56,23 @@ func (m *KeyValue) KeyValue(key string) string {
 	ca.Set(key, m.Value, config.KeyValueDefaultExpire)
 
 	return m.Value
+}
+
+// 事务用法的示例
+func (m *KeyValue) TransactionDemo() {
+	db := m.DB()
+	var funcs []database.TxFunc
+	funcs = append(funcs, func(tx *gorm.DB) error {
+		n := database.Selected(tx)
+		fmt.Printf("\n===============事务方法-1，DB名称：%s\n", n)
+		return nil
+	})
+	funcs = append(funcs, func(tx *gorm.DB) error {
+		n := database.Selected(tx)
+		fmt.Printf("\n===============事务方法-2，DB名称：%s\n", n)
+		return nil
+	})
+	if err := database.Tx(db, funcs...); err != nil {
+		fmt.Println(err.Error())
+	}
 }

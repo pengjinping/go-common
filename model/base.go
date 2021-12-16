@@ -38,7 +38,6 @@ func (m *BaseModel) initMemCache() {
 
 // 指定使用平台库
 //（不会更改 ctx 中的租户信息，只是本 model 内部的 db 连接变化）
-
 func (m *BaseModel) UsePlatform() {
 	m.forcePlatform = true
 	m.dbConnection = nil
@@ -49,7 +48,6 @@ func (m *BaseModel) UsePlatform() {
 
 // 指定使用【传入的】租户库
 //（不会更改 ctx 中的租户信息，只是本 model 内部的 db 连接变化）
-
 func (m *BaseModel) UseTenant(tenantUUID string) {
 	m.forcePlatform = false
 	db := database.ByName(m.currentContext, tenantUUID)
@@ -62,7 +60,6 @@ func (m *BaseModel) UseTenant(tenantUUID string) {
 // 指定使用【默认的】库 (从 ctx 中推断)
 // 可在调用了 UsePlatform()/UseTenant() 之后，调用本方法进行恢复
 //（不会更改 ctx 中的租户信息，只是本 model 内部的 db 连接变化）
-
 func (m *BaseModel) UseDefault() {
 	m.forcePlatform = false
 	m.dbConnection = nil

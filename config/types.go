@@ -30,7 +30,7 @@ type RedisConfig struct {
 	Host     string `mapstructure:"host" json:"host"`
 	Port     int    `mapstructure:"port" json:"port"`
 	Password string `mapstructure:"password" json:"password"`
-	DBName   int   `mapstructure:"dbname" json:"dbname"`
+	DBName   int    `mapstructure:"dbname" json:"dbname"`
 }
 
 type CacheConfig struct {
@@ -51,6 +51,3 @@ type ZapConfig struct {
 type JWTConfig struct {
 	SigningKey string `mapstructure:"signing-key" json:"signing-key"`
 }
-
-// 用于存储各个租户列表信息
-var WebSite = make(map[string]int)

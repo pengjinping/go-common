@@ -5,6 +5,7 @@ import (
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/database"
 	"git.kuainiujinke.com/oa/oa-common-golang/logger"
+	"git.kuainiujinke.com/oa/oa-common-golang/tenancy"
 	"git.kuainiujinke.com/oa/oa-common-golang/utils/oauth2"
 	"git.kuainiujinke.com/oa/oa-common-golang/web"
 
@@ -18,21 +19,22 @@ func InitWebEngine(c *config.ConfigType) *gin.Engine {
 }
 
 func Init(c *config.ConfigType) {
-	//0. 初始化配置
+	// 初始化配置
 	config.Init(c)
 
-	//1. 初始化logger
+	// 初始化logger
 	logger.Init()
 
-	//2. 初始化数据库信息
+	// 初始化数据库信息
 	database.Init()
 
-	//3. 初始化缓存
+	// 初始化租户信息
+	tenancy.Init()
+
+	// 初始化缓存
 	cache.Init()
 
 	// jwt 初始化配置加载
 	oauth2.InitJWT(config.GetString("jwt.public-key"))
 
-	//4. 初始化租户信息
-	//web.InitWebsite()
 }
