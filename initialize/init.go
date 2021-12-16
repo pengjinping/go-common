@@ -5,6 +5,7 @@ import (
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/database"
 	"git.kuainiujinke.com/oa/oa-common-golang/logger"
+	"git.kuainiujinke.com/oa/oa-common-golang/utils/oauth2"
 	"git.kuainiujinke.com/oa/oa-common-golang/web"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,9 @@ func Init(c *config.ConfigType) {
 
 	//3. 初始化缓存
 	cache.Init()
+
+	// jwt 初始化配置加载
+	oauth2.InitJWT(config.GetString("jwt.public-key"))
 
 	//4. 初始化租户信息
 	//web.InitWebsite()
