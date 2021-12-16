@@ -2,13 +2,16 @@ package middleware
 
 import (
 	"context"
-	"strings"
-
+	"fmt"
 	"git.kuainiujinke.com/oa/oa-common-golang/cache"
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/database"
+	"git.kuainiujinke.com/oa/oa-common-golang/logger"
 	"git.kuainiujinke.com/oa/oa-common-golang/model"
 	"git.kuainiujinke.com/oa/oa-common-golang/web"
+	"math/rand"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -81,6 +84,12 @@ func Tenant() gin.HandlerFunc {
 		// 切换缓存
 		if ca := cache.Get(c); ca != nil {
 			c.Set("cache", ca)
+		}
+
+		// 切换日志
+		if log := logger.Get(c); log != nil {
+			c.Set("logger", log)
+			c.Set("loggerId", fmt.Sprintf("%v-%v", time.Now().UnixMicro(), rand.Intn(9999)))
 		}
 
 		// 切换数据库

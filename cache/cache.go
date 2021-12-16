@@ -9,34 +9,34 @@ import (
 )
 
 /**
-	// 获取本次请求的默认缓存 【支持多租户分组】
-	ca := cache.Get(c)
-	ca := cache.GetByDriver(c, "memory")	// 也可以指定驱动 如: 指定缓存驱动示例
+// 获取本次请求的默认缓存 【支持多租户分组】
+ca := cache.Get(c)
+ca := cache.GetByDriver(c, "memory")	// 也可以指定驱动 如: 指定缓存驱动示例
 
-	ca.Driver()		// 获取缓存驱动名称
-	ca.Tenant() 	// 获取缓存租户uuid
+ca.Driver()		// 获取缓存驱动名称
+ca.Tenant() 	// 获取缓存租户uuid
 
-	// 切换租户信息
-	ca.UsePlatform()     // 切换到平台
-	ca.UseDefault()   	 // 切回当前租户
-	ca.UseTenant(uuid)   // 切换到指定租户
+// 切换租户信息
+ca.UsePlatform()     // 切换到平台
+ca.UseDefault()   	 // 切回当前租户
+ca.UseTenant(uuid)   // 切换到指定租户
 
-	// 设置缓存，有有效期 单位是s  当时间为0时 是永久有效 等于Forever
-	ca.Set("AA", "ABC", 2)
-	ca.Forever("AA", "SSSS")	// 设置永久缓存
+// 设置缓存，有有效期 单位是s  当时间为0时 是永久有效 等于Forever
+ca.Set("AA", "ABC", 2)
+ca.Forever("AA", "SSSS")	// 设置永久缓存
 
-	ca.Get("AA")		// 获取缓存
-	ca.Has("AA")		// 是否存在
-	ca.IsExpire("AA")	// 是否过期
-	ca.Delete("AA")		// 删除缓存
-	ca.Keys()			// 获取所有缓存keys
+ca.Get("AA")		// 获取缓存
+ca.Has("AA")		// 是否存在
+ca.IsExpire("AA")	// 是否过期
+ca.Delete("AA")		// 删除缓存
+ca.Keys()			// 获取所有缓存keys
 
-	// 缓存支持闭包函数 在闭包中可以通过后面的参数传进去 不要使用全局变量防止数据污染
-	res := ca.Remember("key", 5, func(args ...interface{}) (interface{}, error) {
-		a := args[0].(int)
-		b := args[1].(int)
-		return a + b + 456, nil
-	}, 4, 500)
+// 缓存支持闭包函数 在闭包中可以通过后面的参数传进去 不要使用全局变量防止数据污染
+res := ca.Remember("key", 5, func(args ...interface{}) (interface{}, error) {
+	a := args[0].(int)
+	b := args[1].(int)
+	return a + b + 456, nil
+}, 4, 500)
 */
 
 var Stores = make(map[string]StoreInterface)
@@ -143,7 +143,7 @@ func (c *Cache) UsePlatform() bool {
 	return c.UseTenant(config.PlatformAlias)
 }
 
-func (c *Cache) UseDefault() bool  {
+func (c *Cache) UseDefault() bool {
 	tenant := config.PlatformAlias
 	if tenantName := c.currentContext.Value("tenant"); tenantName != nil {
 		tenant = tenantName.(string)
@@ -164,7 +164,6 @@ func (c *Cache) UseTenant(tenant string) bool {
 
 	return c.store.SetTenant(tenant, config.WebSite[tenant])
 }
-
 
 func (c *Cache) Set(key string, value interface{}, time int) {
 	c.store.Set(key, value, time)
@@ -190,9 +189,9 @@ func (c *Cache) Keys() interface{} {
 }
 
 func (c *Cache) Remember(key string, time int, f func(...interface{}) (interface{}, error), args ...interface{}) interface{} {
-	isExpire := c.store.IsExpire(key)
-	if !isExpire {
-		return c.Get(key)
+	cacheValue := c.store.Get(key)
+	if cacheValue != nil {
+		return cacheValue
 	}
 
 	value, err := f(args...)

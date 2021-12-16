@@ -8,23 +8,12 @@ import (
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/utils"
 
-	"github.com/gin-gonic/gin"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var Logger *TenantLogger
-
-func Info(ctx *gin.Context, msg string, fields ...zap.Field) {
-	Logger.Info(ctx, msg, fields...)
-}
-
-func Error(ctx *gin.Context, msg string, fields ...zap.Field) {
-	Logger.Error(ctx, msg, fields...)
-}
-
-func Init() {
+func NewZap() *zap.Logger {
 	zapConf := getZapConfig()
 	if ok, _ := utils.PathExists(zapConf.Director); !ok { // 判断是否有Director文件夹
 		fmt.Printf("create %v directory\n", zapConf.Director)
@@ -58,9 +47,8 @@ func Init() {
 	if zapConf.ShowLine {
 		logger = logger.WithOptions(zap.AddCaller())
 	}
-	Logger = &TenantLogger{
-		logger,
-	}
+
+	return logger
 }
 
 func getZapConfig() config.ZapConfig {
