@@ -5,13 +5,13 @@ import (
 )
 
 type group struct {
-	Web             web.HandlerFuncGroup
-	WebAPI          web.HandlerFuncGroup
-	PublicWeb       web.HandlerFuncGroup
-	PublicAPI       web.HandlerFuncGroup
-	MobileClientAPI web.HandlerFuncGroup
-	API             web.HandlerFuncGroup
-	OpenAPI         web.HandlerFuncGroup
+	Web               web.HandlerFuncGroup
+	WebAPI            web.HandlerFuncGroup
+	PublicWeb         web.HandlerFuncGroup
+	PublicAPI         web.HandlerFuncGroup
+	MobileClientAPI   web.HandlerFuncGroup
+	OpenAPIClientAuth web.HandlerFuncGroup
+	OpenAPIUserAuth   web.HandlerFuncGroup
 }
 
 // 中间件组定义
@@ -42,16 +42,16 @@ var Group = group{
 	// 手机 APP 所用的 API，需要【移动客户端登录态/鉴权】
 	MobileClientAPI: web.HandlerFuncGroup{
 		Tenant,
-		ApiAuth,
+		APPClientApiAuth,
 	},
-	// 需要鉴权的 API，服务端对服务端
-	API: web.HandlerFuncGroup{
+	// OAuth【用户授权】的 OpenAPI，服务端对服务端
+	OpenAPIClientAuth: web.HandlerFuncGroup{
 		Tenant,
-		ApiAuth,
+		OAuthCodeVerify,
 	},
-	// 需要 OAuth 鉴权的 OpenAPI，服务端对服务端
-	OpenAPI: web.HandlerFuncGroup{
+	// OAuth【客户端授权】的 OpenAPI，服务端对服务端
+	OpenAPIUserAuth: web.HandlerFuncGroup{
 		Tenant,
-		ApiAuth,
+		OAuthClientVerify,
 	},
 }

@@ -3,14 +3,14 @@ package oauth2
 import (
 	"crypto/rsa"
 	"fmt"
-	"git.kuainiujinke.com/oa/oa-common-golang/logger"
-	"git.kuainiujinke.com/oa/oa-common-golang/web"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/dgrijalva/jwt-go/request"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"git.kuainiujinke.com/oa/oa-common-golang/logger"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -50,7 +50,7 @@ func (t TokenExtractor) ExtractToken(r *http.Request) (string, error) {
 	return strings.TrimSpace(strings.TrimPrefix(token, "Bearer")), nil
 }
 
-func parseToken(r *http.Request) (*jwt.Token, error) {
+func ParseToken(r *http.Request) (*jwt.Token, error) {
 
 	return request.ParseFromRequest(r, TokenExtractor{}, func(token *jwt.Token) (i interface{}, e error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
@@ -58,61 +58,4 @@ func parseToken(r *http.Request) (*jwt.Token, error) {
 		}
 		return publicKey, nil
 	})
-}
-
-func AuthCodeVerify() gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-
-		token, err := parseToken(c.Request)
-		errmsg := ""
-		if err != nil {
-			errmsg = err.Error()
-		}
-		if err != nil || !token.Valid {
-			errmsg = "the requested JWT is invalid. " + errmsg
-			logger.Error(c, errmsg)
-			web.FailWithMessage(errmsg, c)
-			c.Abort()
-			return
-		}
-
-		// 写入授权认证信息
-		claims := token.Claims.(jwt.MapClaims)
-		c.Set("employee_id", fmt.Sprintf("%s", claims["sub"]))
-		c.Set("grant_type", GrantTypeAuthorizationCode)
-		c.Set("scopes", claims["scopes"])
-
-		c.Next()
-	}
-
-}
-
-func ClientVerify() gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-
-		token, err := parseToken(c.Request)
-		errmsg := ""
-		if err != nil {
-			errmsg = err.Error()
-		}
-		if err != nil || !token.Valid {
-			errmsg = "the requested JWT is invalid. " + errmsg
-			logger.Error(c, errmsg)
-			web.FailWithMessage(errmsg, c)
-			c.Abort()
-			return
-		}
-
-		// 写入授权认证信息
-		claims := token.Claims.(jwt.MapClaims)
-		// todo: client_id
-		c.Set("client_id", fmt.Sprintf("%s", claims["sub"]))
-		c.Set("grant_type", GrantTypeClientCredentials)
-		c.Set("scopes", claims["scopes"])
-
-		c.Next()
-	}
-
 }
