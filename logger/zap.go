@@ -38,12 +38,12 @@ func NewZap(tenant string) *zap.Logger {
 	})
 
 	cores := [...]zapcore.Core{
-		getEncoderCore(fmt.Sprintf("./%s/server_debug.log", dirName), debugPriority),
-		getEncoderCore(fmt.Sprintf("./%s/server_info.log", dirName), infoPriority),
-		getEncoderCore(fmt.Sprintf("./%s/server_warn.log", dirName), warnPriority),
-		getEncoderCore(fmt.Sprintf("./%s/server_error.log", dirName), errorPriority),
+		getEncoderCore(fmt.Sprintf("./%s/debug.log", dirName), debugPriority),
+		getEncoderCore(fmt.Sprintf("./%s/info.log", dirName), infoPriority),
+		getEncoderCore(fmt.Sprintf("./%s/warn.log", dirName), warnPriority),
+		getEncoderCore(fmt.Sprintf("./%s/error.log", dirName), errorPriority),
 	}
-	logger := zap.New(zapcore.NewTee(cores[:]...), zap.AddCaller())
+	logger := zap.New(zapcore.NewTee(cores[:]...), zap.AddCaller(), zap.AddCallerSkip(2))
 
 	if zapConf.ShowLine {
 		logger = logger.WithOptions(zap.AddCaller())
