@@ -129,22 +129,26 @@ func Init(customConf *ConfigType) {
 
 }
 
+var envs = map[string]string{
+	"release": ProdConfigFile, // 生产环境
+	"test":    TestConfigFile, // 测试环境
+	"dev":     DevConfigFile,  // 开发环境
+}
+
 func getConfigFile() string {
 	// 配置文件的读取优先级: 命令行 > 环境变量 > 默认值
 	var configFile string
 	flag.StringVar(&configFile, "c", "", "choose config file.")
 	flag.Parse()
 	if configFile == "" {
-		if configEnv := os.Getenv(ConfigEnv); configEnv == "release" {
-			configFile = ProdConfigFile
-			fmt.Printf("您正在使用生产环境")
-		} else if configEnv == "test" {
-			configFile = TestConfigFile
-			fmt.Printf("您正在使用测试环境")
-		} else {
-			configFile = DevConfigFile
-			fmt.Printf("您正在使用开发环境")
+		cfgEnv := os.Getenv(ConfigEnv)
+		cfgFileName, ok := envs[cfgEnv]
+		if !ok {
+			cfgEnv = "dev"
+			cfgFileName = envs[cfgEnv]
 		}
+		fmt.Printf("您正在使用%s环境", cfgEnv)
+		configFile = fmt.Sprintf("%s/%s", cfgEnv, cfgFileName)
 	} else {
 		fmt.Printf("您正在使用命令行的-c参数传递的值")
 	}

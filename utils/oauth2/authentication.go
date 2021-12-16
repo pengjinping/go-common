@@ -70,8 +70,8 @@ func AuthCodeVerify() gin.HandlerFunc {
 			errmsg = err.Error()
 		}
 		if err != nil || !token.Valid {
-			errmsg = "the requested JWT is invalid" + errmsg
-			//logger.Error(&gin.Context{}, errmsg)
+			errmsg = "the requested JWT is invalid. " + errmsg
+			logger.Error(c, errmsg)
 			web.FailWithMessage(errmsg, c)
 			c.Abort()
 			return
@@ -98,14 +98,9 @@ func ClientVerify() gin.HandlerFunc {
 			errmsg = err.Error()
 		}
 		if err != nil || !token.Valid {
-			errmsg = "the requested JWT is invalid" + errmsg
-			logger.Error(&gin.Context{}, errmsg)
+			errmsg = "the requested JWT is invalid. " + errmsg
+			logger.Error(c, errmsg)
 			web.FailWithMessage(errmsg, c)
-			//c.JSON(http.StatusOK, gin.H{
-			//	"code":    1,
-			//	"message": errmsg,
-			//	"data":    nil,
-			//})
 			c.Abort()
 			return
 		}
