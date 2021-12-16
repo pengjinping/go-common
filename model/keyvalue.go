@@ -2,9 +2,9 @@ package model
 
 import (
 	"context"
-	"git.kuainiujinke.com/oa/oa-common-golang/cache"
-	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"strings"
+
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
 )
 
 type KeyValue struct {
@@ -25,8 +25,8 @@ func (KeyValue) TableName() string {
 
 func NewKeyValue(ctx context.Context) *KeyValue {
 	var kv KeyValue
-	kv.currentContext = ctx
-	kv.cacheConn = cache.Get(ctx)
+	kv.initModel(ctx)
+	kv.initCache()
 	return &kv
 }
 

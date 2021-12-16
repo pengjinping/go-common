@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"fmt"
-	"git.kuainiujinke.com/oa/oa-common-golang/cache"
 )
 
 type Permission struct {
@@ -22,8 +21,8 @@ type Abilities struct {
 
 func NewPermission(ctx context.Context) *Permission {
 	var p Permission
-	p.currentContext = ctx
-	p.cacheConn = cache.ByDriver(ctx, "memory")
+	p.initModel(ctx)
+	p.initMemCache()
 	return &p
 }
 

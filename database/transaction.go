@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type TxFunc func(db *gorm.DB) error
+type TxFunc func(tx *gorm.DB) error
 
 // 在db事务内执行一个/多个函数，返回可能出现的错误
 // 【注意】请勿在事务中做以下操作，回滚时会导致一致性问题：

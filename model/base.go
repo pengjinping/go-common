@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+
 	"git.kuainiujinke.com/oa/oa-common-golang/cache"
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/database"
@@ -20,13 +21,30 @@ type BaseModel struct {
 	currentContext context.Context
 }
 
+// 对 model 的一般属性的初始化
+func (m *BaseModel) initModel(ctx context.Context) {
+	m.currentContext = ctx
+}
+
+// 对 model 中所用缓存引擎的初始化（默认 redis 缓存）
+func (m *BaseModel) initCache() {
+	m.cacheConn = cache.Get(m.currentContext)
+}
+
+// 对 model 中使用内存缓存引擎的初始化 （与 initCache() 二选一，不支持两者同时用）
+func (m *BaseModel) initMemCache() {
+	m.cacheConn = cache.ByDriver(m.currentContext, "memory")
+}
+
 // 指定使用平台库
 //（不会更改 ctx 中的租户信息，只是本 model 内部的 db 连接变化）
 
 func (m *BaseModel) UsePlatform() {
 	m.forcePlatform = true
 	m.dbConnection = nil
-	m.cacheConn.UsePlatform()
+	if m.cacheConn != nil {
+		m.cacheConn.UsePlatform()
+	}
 }
 
 // 指定使用【传入的】租户库
@@ -36,7 +54,9 @@ func (m *BaseModel) UseTenant(tenantUUID string) {
 	m.forcePlatform = false
 	db := database.ByName(m.currentContext, tenantUUID)
 	m.dbConnection = db
-	m.cacheConn.UseTenant(tenantUUID)
+	if m.cacheConn != nil {
+		m.cacheConn.UseTenant(tenantUUID)
+	}
 }
 
 // 指定使用【默认的】库 (从 ctx 中推断)
@@ -46,7 +66,9 @@ func (m *BaseModel) UseTenant(tenantUUID string) {
 func (m *BaseModel) UseDefault() {
 	m.forcePlatform = false
 	m.dbConnection = nil
-	m.cacheConn.UseDefault()
+	if m.cacheConn != nil {
+		m.cacheConn.UseDefault()
+	}
 }
 
 // DB 获取默认的 db 连接

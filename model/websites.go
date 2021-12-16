@@ -44,13 +44,13 @@ func (w Websites) ByUUID(uuid string) *Websites {
 func (w *Websites) TransactionDemo() {
 	db := w.DB()
 	var funcs []database.TxFunc
-	funcs = append(funcs, func(db *gorm.DB) error {
-		n := database.Selected(db)
+	funcs = append(funcs, func(tx *gorm.DB) error {
+		n := database.Selected(tx)
 		fmt.Printf("\n===============事务方法-1，DB名称：%s\n", n)
 		return nil
 	})
-	funcs = append(funcs, func(db *gorm.DB) error {
-		n := database.Selected(db)
+	funcs = append(funcs, func(tx *gorm.DB) error {
+		n := database.Selected(tx)
 		fmt.Printf("\n===============事务方法-2，DB名称：%s\n", n)
 		return nil
 	})
