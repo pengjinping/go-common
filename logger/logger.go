@@ -7,7 +7,7 @@ import (
 )
 
 func Init() {
-	NewTenantLogger()
+	NewTenantLogger(config.PlatformAlias)
 }
 
 func Get(ctx context.Context) *TenantLogger {

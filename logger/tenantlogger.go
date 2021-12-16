@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"go.uber.org/zap"
 )
 
@@ -13,20 +12,18 @@ type TenantLogger struct {
 	Zap      *zap.Logger
 }
 
-func NewTenantLogger() {
+func NewTenantLogger(loggerName string) {
 	logger := &TenantLogger{
-		tenant:   config.PlatformAlias,
+		tenant:   loggerName,
 		loggerId: "",
-		Zap:      NewZap(),
+		Zap:      NewZap(loggerName),
 	}
-	StoresLogger[config.PlatformAlias] = logger
+	StoresLogger[loggerName] = logger
 }
 
 func ByName(tenant, loggerId string) *TenantLogger {
 	if _, ok := StoresLogger[tenant]; !ok {
-		logger := StoresLogger[config.PlatformAlias]
-		logger.tenant = tenant
-		StoresLogger[tenant] = logger
+		NewTenantLogger(tenant)
 	}
 
 	StoresLogger[tenant].loggerId = loggerId

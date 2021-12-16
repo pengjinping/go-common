@@ -13,11 +13,12 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func NewZap() *zap.Logger {
+func NewZap(tenant string) *zap.Logger {
 	zapConf := getZapConfig()
-	if ok, _ := utils.PathExists(zapConf.Director); !ok { // 判断是否有Director文件夹
-		fmt.Printf("create %v directory\n", zapConf.Director)
-		_ = os.Mkdir(zapConf.Director, os.ModePerm)
+	dirName := zapConf.Director + "/" + tenant
+	if ok, _ := utils.PathExists(dirName); !ok { // 判断是否有Director文件夹
+		fmt.Printf("create %v directory\n", dirName)
+		_ = os.Mkdir(dirName, os.ModePerm)
 	}
 	// 调试级别
 	debugPriority := zap.LevelEnablerFunc(func(lev zapcore.Level) bool {
@@ -37,10 +38,10 @@ func NewZap() *zap.Logger {
 	})
 
 	cores := [...]zapcore.Core{
-		getEncoderCore(fmt.Sprintf("./%s/server_debug.log", zapConf.Director), debugPriority),
-		getEncoderCore(fmt.Sprintf("./%s/server_info.log", zapConf.Director), infoPriority),
-		getEncoderCore(fmt.Sprintf("./%s/server_warn.log", zapConf.Director), warnPriority),
-		getEncoderCore(fmt.Sprintf("./%s/server_error.log", zapConf.Director), errorPriority),
+		getEncoderCore(fmt.Sprintf("./%s/server_debug.log", dirName), debugPriority),
+		getEncoderCore(fmt.Sprintf("./%s/server_info.log", dirName), infoPriority),
+		getEncoderCore(fmt.Sprintf("./%s/server_warn.log", dirName), warnPriority),
+		getEncoderCore(fmt.Sprintf("./%s/server_error.log", dirName), errorPriority),
 	}
 	logger := zap.New(zapcore.NewTee(cores[:]...), zap.AddCaller())
 
