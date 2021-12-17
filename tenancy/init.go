@@ -13,6 +13,7 @@ import (
 // 设置所有租户信息，缓存在内存中
 // TODO 这里使用内存缓存，没有过期时间机制
 // 		当新增租户的时候，需要主动再调用这个方法，来刷新这里的缓存
+
 func Init() {
 	var sites []Websites
 	Tenants = make(map[string]Websites)
@@ -21,6 +22,7 @@ func Init() {
 	for _, v := range sites {
 		Tenants[v.UUID] = v
 	}
+
 	Tenants[config.PlatformAlias] = Websites{
 		ID:   0,
 		Name: config.PlatformAlias,

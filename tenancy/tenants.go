@@ -20,6 +20,12 @@ func ByUUID(UUID string) *Websites {
 		return &w
 	}
 
+	// 如果没有获取到，则先重置一下租户信息  新开租户时，无需重启就可以获取到新租户信息
+	Init()
+	if w, ok := Tenants[UUID]; ok {
+		return &w
+	}
+
 	return nil
 }
 
