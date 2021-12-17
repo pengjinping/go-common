@@ -16,16 +16,22 @@ import (
 )
 
 func TenantUUIDResolver(ctx *gin.Context) string {
-	h := ctx.Request.Host
+	var tenantFlag string
+	var headerTenantValue = ctx.Request.Header.Get("Tenant")
+	if headerTenantValue != "" {
+		tenantFlag = headerTenantValue
+	} else {
+		tenantFlag = ctx.Request.Host
+	}
 	// 若有端口号，去除之
-	if i := strings.Index(h, ":"); i > -1 {
-		h = h[:i]
+	if i := strings.Index(tenantFlag, ":"); i > -1 {
+		tenantFlag = tenantFlag[:i]
 	}
 	// 若是对平台的请求，则 uuid 设为固定的别名
-	if h == config.GetString("server.host") {
-		h = config.PlatformAlias
+	if tenantFlag == config.GetString("server.host") {
+		tenantFlag = config.PlatformAlias
 	}
-	return h
+	return tenantFlag
 }
 
 func Tenant() gin.HandlerFunc {
