@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	ConfigEnv      = "GIN_MODE"
+	ConfigEnv      = "OA_SITE_ENV"
 	ConfigDir      = "./deployment/"
 	DevConfigFile  = "application-dev.yaml"
 	TestConfigFile = "application-test.yaml"
@@ -130,9 +130,9 @@ func Init(customConf *ConfigType) {
 }
 
 var envs = map[string]string{
-	"release": ProdConfigFile, // 生产环境
-	"test":    TestConfigFile, // 测试环境
-	"dev":     DevConfigFile,  // 开发环境
+	"prod": ProdConfigFile, // 生产环境
+	"test": TestConfigFile, // 测试环境
+	"dev":  DevConfigFile,  // 开发环境
 }
 
 func getConfigFile() string {
