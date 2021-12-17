@@ -28,8 +28,8 @@ func (KeyValue) TableName() string {
 
 func NewKeyValue(ctx context.Context) *KeyValue {
 	var kv KeyValue
-	kv.initModel(ctx)
-	kv.initCache()
+	kv.InitModel(ctx)
+	kv.InitCache()
 	//kv.UsePlatform() // 强制使用系统库。若无需强制，请删除此行
 	return &kv
 }

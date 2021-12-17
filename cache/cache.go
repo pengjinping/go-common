@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
-	"git.kuainiujinke.com/oa/oa-common-golang/tenancy"
+	"git.kuainiujinke.com/oa/oa-common-golang/web"
 )
 
 /**
@@ -160,7 +160,7 @@ func (c *Cache) UseTenant(tenant string) bool {
 		return false
 	}
 
-	site := tenancy.ByUUID(tenant)
+	site := web.SiteByUUID(tenant)
 	if site == nil {
 		log.Printf("缓存：切换租户失败，租户%s不存在", tenant)
 		return false

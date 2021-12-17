@@ -1,5 +1,7 @@
 package model
 
+// 从 model 中分离出这个子包，是为了避免 model 和 cache 包的循环引用问题
+
 import (
 	"context"
 
@@ -22,17 +24,17 @@ type BaseModel struct {
 }
 
 // 对 model 的一般属性的初始化
-func (m *BaseModel) initModel(ctx context.Context) {
+func (m *BaseModel) InitModel(ctx context.Context) {
 	m.currentContext = ctx
 }
 
 // 对 model 中所用缓存引擎的初始化（默认 redis 缓存）
-func (m *BaseModel) initCache() {
+func (m *BaseModel) InitCache() {
 	m.cacheConn = cache.Get(m.currentContext)
 }
 
 // 对 model 中使用内存缓存引擎的初始化 （与 initCache() 二选一，不支持两者同时用）
-func (m *BaseModel) initMemCache() {
+func (m *BaseModel) InitMemCache() {
 	m.cacheConn = cache.ByDriver(m.currentContext, "memory")
 }
 
