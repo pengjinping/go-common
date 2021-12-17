@@ -5,7 +5,6 @@ import (
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/database"
 	"git.kuainiujinke.com/oa/oa-common-golang/logger"
-	"git.kuainiujinke.com/oa/oa-common-golang/tenancy"
 	"git.kuainiujinke.com/oa/oa-common-golang/utils/oauth2"
 	"git.kuainiujinke.com/oa/oa-common-golang/web"
 
@@ -27,9 +26,6 @@ func Init(c *config.ConfigType) {
 
 	// 初始化数据库信息
 	database.Init()
-
-	// 初始化租户信息
-	tenancy.Init()
 
 	// 初始化缓存
 	cache.Init()

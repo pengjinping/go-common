@@ -21,8 +21,8 @@ type Abilities struct {
 
 func NewPermission(ctx context.Context) *Permission {
 	var p Permission
-	p.initModel(ctx)
-	p.initMemCache()
+	p.InitModel(ctx)
+	p.InitMemCache()
 	return &p
 }
 
