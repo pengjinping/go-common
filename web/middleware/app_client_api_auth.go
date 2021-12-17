@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -72,7 +71,7 @@ func APPClientApiAuth() gin.HandlerFunc {
 
 		c.Set("claims", claims)
 		c.Set("email", claims["email"])
-		c.Set("userId", fmt.Sprintf("%v", claims["sub"]))
+		//c.Set("userId", fmt.Sprintf("%v", claims["sub"]))
 		c.Next()
 	}
 
