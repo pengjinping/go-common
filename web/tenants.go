@@ -26,32 +26,26 @@ type oneSiteFunc func() *Websites
 
 // 根据 UUID 获取一个租户
 func SiteByUUID(UUID string) *Websites {
-	f := func() oneSiteFunc {
-		return func() *Websites {
-			if w, ok := websitesCache[UUID]; ok {
-				return &w
-			}
-
-			return nil
+	return oneSiteCacheFor(fmt.Sprintf("UUID_%s", UUID), func() *Websites {
+		if w, ok := websitesCache[UUID]; ok {
+			return &w
 		}
-	}()
-	return oneSiteCacheFor(fmt.Sprintf("UUID_%s", UUID), f)
+
+		return nil
+	})
 }
 
 // 根据 ID 获取一个租户
 func SiteByID(ID uint) *Websites {
-	f := func() oneSiteFunc {
-		return func() *Websites {
-			for _, v := range websitesCache {
-				if v.ID == ID {
-					return &v
-				}
+	return oneSiteCacheFor(fmt.Sprintf("ID_%d", ID), func() *Websites {
+		for _, v := range websitesCache {
+			if v.ID == ID {
+				return &v
 			}
-
-			return nil
 		}
-	}()
-	return oneSiteCacheFor(fmt.Sprintf("ID_%d", ID), f)
+
+		return nil
+	})
 }
 
 // 从平台库中查出所有租户信息，缓存在内存中
@@ -69,24 +63,27 @@ func initWebsites() {
 		Name: config.PlatformAlias,
 		UUID: config.GetString("server.host"),
 	}
-	fmt.Println("======INIT SITES=====")
+	// fmt.Println("======INIT SITES=====")
 }
 
 // 执行一个从缓存中获取租户的函数，若没获取到，则重新初始化缓存，再尝试一次
-func oneSiteCacheFor(reason string, f oneSiteFunc) *Websites {
+func oneSiteCacheFor(reasonKey string, f oneSiteFunc) *Websites {
 	res := f()
 	if res == nil {
-		initWebsitesFor(reason)
+		initWebsitesFor(reasonKey)
 		res = f()
 	}
 	return res
 }
 
 // 为某原因执行 InitWebsites，但会防止过多次的执行
-func initWebsitesFor(reason string) {
+func initWebsitesFor(reasonKey string) {
 	maxTimes := 3
-	if times, ok := initWebsitesLog[reason]; !ok || times < maxTimes {
-		initWebsitesLog[reason] = times + 1
-		initWebsites()
+	maxKeys := 1000
+	if len(initWebsitesLog) <= maxKeys {
+		if times, ok := initWebsitesLog[reasonKey]; !ok || times < maxTimes {
+			initWebsitesLog[reasonKey] = times + 1
+			initWebsites()
+		}
 	}
 }
