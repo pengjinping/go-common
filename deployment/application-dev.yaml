@@ -1,5 +1,5 @@
 server:
-  host: 127.0.0.1
+  host: local.oa.com
   port: 9070
 debug: true
 env_prefix:
@@ -22,7 +22,7 @@ zap:
   level: 'info'
   format: 'console'
   prefix: '[oa]'
-  director: 'log'
+  directory: 'log'
   link-name: 'latest_log'
   show-line: true
   encode-level: 'LowercaseColorLevelEncoder'

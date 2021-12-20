@@ -118,11 +118,14 @@ func Init(customConf *ConfigType) {
 	config.SetEnvPrefix(config.GetString("envPrefix"))
 	config.AutomaticEnv()
 
+	//将系统环境变量，存储到“env”别名中，便于使用
+	config.Set("env", config.GetString("OA_SITE_ENV"))
+
 	if err := config.MergeConfigMap(*customConf); err != nil {
 		log.Printf("合并配置信息失败")
 	}
 
-	if GetBool("Debug") {
+	if GetBool("debug") && !IsProduction() {
 		j, _ := json.Marshal(config.AllSettings())
 		fmt.Printf("\nDebug模式：开启\n========Config========\n%v\n======================\n", string(j))
 	}
@@ -147,12 +150,12 @@ func getConfigFile() string {
 			cfgEnv = "dev"
 			cfgFileName = envs[cfgEnv]
 		}
-		fmt.Printf("您正在使用%s环境", cfgEnv)
+		fmt.Printf("您正在使用 %s 环境", cfgEnv)
 		configFile = fmt.Sprintf("%s/%s", cfgEnv, cfgFileName)
 	} else {
 		fmt.Printf("您正在使用命令行的-c参数传递的值")
 	}
 	configFile = ConfigDir + configFile
-	fmt.Printf(" config的路径为: %v\n", configFile)
+	fmt.Printf(", config 的路径为: %v\n", configFile)
 	return configFile
 }

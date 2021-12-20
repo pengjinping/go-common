@@ -33,6 +33,17 @@ type routerConfig struct {
 var routerGroups = make(map[string]routerConfig)
 
 func Init() *gin.Engine {
+	var mode string
+	switch config.GetString("env") {
+	case "prod":
+		mode = gin.ReleaseMode
+	case "test":
+		mode = gin.TestMode
+	default:
+		mode = gin.DebugMode
+	}
+	gin.SetMode(mode)
+
 	e := gin.Default()
 
 	if exists, err := utils.PathExists("./templates"); err == nil && exists {

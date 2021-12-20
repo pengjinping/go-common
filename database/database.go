@@ -72,7 +72,8 @@ func connect(cfg *config.MysqlConfig, dbName string) {
 		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBName)
 
 	var ormLogger logger.Interface
-	if config.GetBool("Debug") {
+	// 生产环境 强制不打印详细 SQL 日志
+	if config.GetBool("debug") && !config.IsProduction() {
 		ormLogger = logger.Default.LogMode(logger.Info)
 	} else {
 		ormLogger = logger.Default

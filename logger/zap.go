@@ -15,8 +15,8 @@ import (
 
 func NewZap(tenant string) *zap.Logger {
 	zapConf := getZapConfig()
-	dirName := zapConf.Director + "/" + tenant
-	if ok, _ := utils.PathExists(dirName); !ok { // 判断是否有Director文件夹
+	dirName := zapConf.Directory + "/" + tenant
+	if ok, _ := utils.PathExists(dirName); !ok { // 判断是否有Directory文件夹
 		fmt.Printf("create %v directory\n", dirName)
 		_ = os.Mkdir(dirName, os.ModePerm)
 	}
