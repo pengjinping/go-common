@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"errors"
+	"git.kuainiujinke.com/oa/oa-common-golang/utils/directory"
 	"log"
 	"net/http"
 	"os"
@@ -10,10 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"git.kuainiujinke.com/oa/oa-common-golang/config"
-	"git.kuainiujinke.com/oa/oa-common-golang/utils"
-
 	"fmt"
+	"git.kuainiujinke.com/oa/oa-common-golang/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,7 +45,7 @@ func Init() *gin.Engine {
 
 	e := gin.Default()
 
-	if exists, err := utils.PathExists("./templates"); err == nil && exists {
+	if exists, err := directory.PathExists("./templates"); err == nil && exists {
 		e.LoadHTMLGlob("templates/*")
 	}
 
