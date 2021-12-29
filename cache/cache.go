@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
 	"git.kuainiujinke.com/oa/oa-common-golang/web"
@@ -42,6 +43,7 @@ res := ca.Remember("key", 5, func(args ...interface{}) (interface{}, error) {
 */
 
 var Stores = make(map[string]StoreInterface)
+var lock sync.Mutex
 
 type Cache struct {
 	driver         string // 缓存驱动
@@ -126,7 +128,10 @@ func register(driver string) {
 		return
 	}
 
+	lock.Lock()
 	Stores[driver] = store
+	lock.Unlock()
+
 	log.Printf("cache driver \"%s\" connected success.", driver)
 }
 

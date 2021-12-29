@@ -2,9 +2,11 @@ package logger
 
 import (
 	"go.uber.org/zap"
+	"sync"
 )
 
 var StoresLogger = make(map[string]*TenantLogger)
+var lock sync.Mutex
 
 type TenantLogger struct {
 	tenant   string
@@ -13,20 +15,25 @@ type TenantLogger struct {
 }
 
 func NewTenantLogger(loggerName string) {
+	if _, ok := StoresLogger[loggerName]; ok {
+		return
+	}
+
 	logger := &TenantLogger{
 		tenant:   loggerName,
 		loggerId: "",
 		Zap:      NewZap(loggerName),
 	}
+
+	lock.Lock()
 	StoresLogger[loggerName] = logger
+	lock.Unlock()
 }
 
 func ByName(tenant, loggerId string) *TenantLogger {
-	if _, ok := StoresLogger[tenant]; !ok {
-		NewTenantLogger(tenant)
-	}
-
+	NewTenantLogger(tenant)
 	StoresLogger[tenant].loggerId = loggerId
+
 	return StoresLogger[tenant]
 }
 
