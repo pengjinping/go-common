@@ -2,12 +2,11 @@ package logger
 
 import (
 	"fmt"
+	"git.kuainiujinke.com/oa/oa-common-golang/utils/directory"
 	"os"
 	"time"
 
 	"git.kuainiujinke.com/oa/oa-common-golang/config"
-	"git.kuainiujinke.com/oa/oa-common-golang/utils"
-
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,7 +15,7 @@ import (
 func NewZap(tenant string) *zap.Logger {
 	zapConf := getZapConfig()
 	dirName := zapConf.Directory + "/" + tenant
-	if ok, _ := utils.PathExists(dirName); !ok { // 判断是否有Directory文件夹
+	if ok, _ := directory.PathExists(dirName); !ok { // 判断是否有Directory文件夹
 		fmt.Printf("create %v directory\n", dirName)
 		_ = os.Mkdir(dirName, os.ModePerm)
 	}
