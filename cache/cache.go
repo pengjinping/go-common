@@ -118,6 +118,8 @@ func register(driver string) {
 		return
 	}
 
+	lock.Lock()
+
 	var store StoreInterface
 	if driver == "redis" {
 		store = NewRedisStore(config.PlatformAlias)
@@ -128,7 +130,6 @@ func register(driver string) {
 		return
 	}
 
-	lock.Lock()
 	Stores[driver] = store
 	lock.Unlock()
 

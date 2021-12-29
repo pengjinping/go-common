@@ -19,13 +19,13 @@ func NewTenantLogger(loggerName string) {
 		return
 	}
 
+	lock.Lock()
 	logger := &TenantLogger{
 		tenant:   loggerName,
 		loggerId: "",
 		Zap:      NewZap(loggerName),
 	}
 
-	lock.Lock()
 	StoresLogger[loggerName] = logger
 	lock.Unlock()
 }
